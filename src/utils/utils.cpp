@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
 
 bool readFile(const std::string& filename, std::string& content)
 {
@@ -24,4 +25,22 @@ bool readFile(const std::string& filename, std::string& content)
 
 	file.close();
 	return true;
+}
+
+std::vector<char> readFilePipeline(const std::string& filepath)
+{
+	std::ifstream file(filepath, std::ios::ate | std::ios::binary);
+	if (!file.is_open())
+	{
+		throw std::runtime_error("Failed to open file: "+filepath);
+	}
+
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+
+	file.close();
+	return buffer;
 }
