@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\..\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\..\</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -137,11 +143,20 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
+    <ClCompile Include="..\..\src\utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp" />
+    <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />
+    <ClInclude Include="..\..\src\utils\utils.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\compile.bat" />
+    <None Include="..\..\src\shaders\simple_shader.frag" />
+    <None Include="..\..\src\shaders\simple_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

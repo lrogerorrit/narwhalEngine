@@ -13,6 +13,18 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="shaders">
+      <UniqueIdentifier>{a404f779-ac50-4553-aee2-b05400c4a24b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\vertex">
+      <UniqueIdentifier>{6b685550-be49-40db-a511-bfc8ac93124c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shaders\fragment">
+      <UniqueIdentifier>{49de49b5-b5c1-46a5-b787-befd59bccc9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utils">
+      <UniqueIdentifier>{4497b46f-a3e7-4a34-a448-771eff13366d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cpp">
@@ -24,6 +36,12 @@
     <ClCompile Include="..\..\src\first_app.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\narwhal_pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utils\utils.cpp">
+      <Filter>utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\narwhal_window.hpp">
@@ -32,5 +50,22 @@
     <ClInclude Include="..\..\src\first_app.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\narwhal_pipeline.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utils\utils.hpp">
+      <Filter>utils</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\shaders\simple_shader.vert">
+      <Filter>shaders\vertex</Filter>
+    </None>
+    <None Include="..\..\src\shaders\simple_shader.frag">
+      <Filter>shaders\fragment</Filter>
+    </None>
+    <None Include="..\..\src\compile.bat">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

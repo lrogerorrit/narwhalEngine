@@ -6,9 +6,9 @@
 #include <stdexcept>
 
 int main() {
-	narwhal::FirstApp app{};
 
 	try {
+		narwhal::FirstApp app{};
 		app.run();
 	}
 	catch (const std::exception& e) {
