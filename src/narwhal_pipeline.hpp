@@ -1,17 +1,42 @@
 #pragma once
 
+#include "narwhal_device.hpp"
+
+//std
 #include <string>
 #include <vector>
 
 namespace narwhal {
-	class narwhalPipeline
+
+	struct PipelineConfigInfo {};
+	
+	class NarwhalPipeline
 	{
 	public:
-		narwhalPipeline(const std::string& vertFilepath, const std::string& fragFilepath);
+		NarwhalPipeline(
+			NarwhalDevice& device,
+			const std::string& vertFilepath,
+			const std::string& fragFilepath, 
+			const PipelineConfigInfo& configInfo);
+
+		~NarwhalPipeline() {};
+
+		NarwhalPipeline(const NarwhalPipeline&) = delete;
+		NarwhalPipeline& operator=(const NarwhalPipeline&) = delete;
+		
+		static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
 		
 	private:
 		
-		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath);
+		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+		
+		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
+		
+		NarwhalDevice& narwhalDevice;
+		
+		VkPipeline graphicsPipeline;
+		VkShaderModule vertShaderModule;
+		VkShaderModule fragShaderModule;
 	};
 }
 

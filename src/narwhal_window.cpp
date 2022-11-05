@@ -1,5 +1,8 @@
 #include "narwhal_window.hpp"
 
+//std
+#include <stdexcept>
+
 namespace narwhal {
 
 	NarwhalWindow::NarwhalWindow(int w, int h, std::string name) : width(w), height(h), windowName(name) {
@@ -9,6 +12,13 @@ namespace narwhal {
 	NarwhalWindow::~NarwhalWindow() {
 		glfwDestroyWindow(window);
 		glfwTerminate();
+	}
+
+	void NarwhalWindow::createWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+	{
+		if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create window surface!");
+		}
 	}
 
 	void NarwhalWindow::initWindow() {

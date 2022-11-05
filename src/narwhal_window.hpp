@@ -15,6 +15,7 @@ namespace narwhal {
 		NarwhalWindow& operator=(const NarwhalWindow&) = delete;
 		
 		bool shouldClose() { return glfwWindowShouldClose(window); }
+		void createWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 	private:
 		void initWindow();
 		

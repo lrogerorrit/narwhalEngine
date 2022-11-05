@@ -1,7 +1,9 @@
 #pragma once
 
-#include  "narwhal_window.hpp"
-#include  "narwhal_pipeline.hpp"
+#include "narwhal_window.hpp"
+#include "narwhal_pipeline.hpp"
+#include "narwhal_device.hpp"
+
 
 namespace narwhal {
 	class FirstApp
@@ -14,8 +16,9 @@ namespace narwhal {
 		void run();
 
 	private:
-		NarwhalWindow window{ WIDTH, HEIGHT, "Hello Vulkan!" };
-		narwhalPipeline pipeline{ "src/shaders/simple_shader.vert.spv", "src/shaders/simple_shader.frag.spv" };
+		NarwhalWindow narwhalWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
+		NarwhalDevice narwhalDevice{ narwhalWindow };
+		NarwhalPipeline pipeline{narwhalDevice, "src/shaders/simple_shader.vert.spv", "src/shaders/simple_shader.frag.spv",NarwhalPipeline::defaultPipelineConfigInfo(WIDTH,HEIGHT)};
 	
 	};
 

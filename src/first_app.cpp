@@ -3,7 +3,7 @@
 namespace narwhal {
 	void FirstApp::run()
 	{
-		while (!window.shouldClose())
+		while (!narwhalWindow.shouldClose())
 		{
 			glfwPollEvents();
 		}

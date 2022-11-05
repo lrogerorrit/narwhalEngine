@@ -143,12 +143,14 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\narwhal_device.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
     <ClCompile Include="..\..\src\utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp" />
+    <ClInclude Include="..\..\src\narwhal_device.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />
     <ClInclude Include="..\..\src\utils\utils.hpp" />

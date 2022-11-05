@@ -42,11 +42,11 @@
     <ClCompile Include="..\..\src\utils\utils.cpp">
       <Filter>utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\narwhal_device.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\narwhal_window.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\first_app.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -55,6 +55,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\utils\utils.hpp">
       <Filter>utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\narwhal_device.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\narwhal_window.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
