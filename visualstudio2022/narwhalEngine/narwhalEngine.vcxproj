@@ -119,6 +119,11 @@
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../libs/include/glfw-3.3.8.bin.WIN64/lib-vc2022;C:\VulkanSDK\1.3.231.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>cd $(SolutionDir)
+cd ../src
+call compile.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -139,12 +144,18 @@
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../libs/include/glfw-3.3.8.bin.WIN64/lib-vc2022;C:\VulkanSDK\1.3.231.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>cd $(SolutionDir)
+cd ../src
+call compile.bat</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\narwhal_device.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
+    <ClCompile Include="..\..\src\narwhal_swap_chain.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
     <ClCompile Include="..\..\src\utils\utils.cpp" />
   </ItemGroup>
@@ -152,6 +163,7 @@
     <ClInclude Include="..\..\src\first_app.hpp" />
     <ClInclude Include="..\..\src\narwhal_device.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
+    <ClInclude Include="..\..\src\narwhal_swap_chain.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />
     <ClInclude Include="..\..\src\utils\utils.hpp" />
   </ItemGroup>

@@ -59,6 +59,8 @@ namespace narwhal {
 			vertexInputInfo.vertexAttributeDescriptionCount = 0;
 			vertexInputInfo.vertexBindingDescriptionCount = 0;
 			vertexInputInfo.pVertexBindingDescriptions = nullptr;
+
+			
 			
 			VkGraphicsPipelineCreateInfo pipelineInfo{};
 			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -105,8 +107,13 @@ namespace narwhal {
 			}
 		}
 	
-		PipelineConfigInfo NarwhalPipeline::defaultPipelineConfigInfo(uint32_t width, uint32_t height) 	{
-			PipelineConfigInfo configInfo{};
+		void NarwhalPipeline::bind(VkCommandBuffer commandBuffer)
+		{
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline); // VK_PIPELINE_BIND_POINT_GRAPHICS is used to declare it as a graphics pipeline
+		}
+
+		void NarwhalPipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo, uint32_t width, uint32_t height) 	{
+			
 
 			configInfo.inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 			configInfo.inputAssemblyInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -127,6 +134,7 @@ namespace narwhal {
 			configInfo.viewportInfo.pViewports = &configInfo.viewport;
 			configInfo.viewportInfo.scissorCount = 1;
 			configInfo.viewportInfo.pScissors = &configInfo.scissor;
+			
 
 			configInfo.rasterizationInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 			configInfo.rasterizationInfo.depthClampEnable = VK_FALSE;
@@ -180,6 +188,6 @@ namespace narwhal {
 			configInfo.depthStencilInfo.front = {};  // Optional
 			configInfo.depthStencilInfo.back = {};   // Optional
 			
-			return configInfo;
+			
 		}
 }

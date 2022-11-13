@@ -1,3 +1,6 @@
-C:\VulkanSDK\1.3.231.1\Bin\glslc.exe shaders\simple_shader.vert -o shaders\simple_shader.vert.spv
-C:\VulkanSDK\1.3.231.1\Bin\glslc.exe shaders\simple_shader.frag -o shaders\simple_shader.frag.spv
-pause
+@echo on
+cd shaders
+for %%f in (*.frag,*.vert) do (
+	%VULKAN_SDK%\Bin\glslc.exe "%%~f" -o "%%~f.spv"
+)
+cd ..

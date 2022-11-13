@@ -9,8 +9,13 @@
 namespace narwhal {
 
 	struct PipelineConfigInfo {
+		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+		PipelineConfigInfo() = default;
+		
 		VkViewport viewport;
 		VkRect2D scissor;
+		
 		VkPipelineViewportStateCreateInfo viewportInfo;
 		VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
 		VkPipelineRasterizationStateCreateInfo rasterizationInfo;
@@ -36,8 +41,10 @@ namespace narwhal {
 
 		NarwhalPipeline(const NarwhalPipeline&) = delete;
 		NarwhalPipeline& operator=(const NarwhalPipeline&) = delete;
+
+		void bind(VkCommandBuffer commandBuffer);
 		
-		static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+		static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo, uint32_t width, uint32_t height);
 		
 	private:
 		
