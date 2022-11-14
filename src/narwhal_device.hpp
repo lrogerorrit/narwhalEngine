@@ -35,9 +35,10 @@ class NarwhalDevice {
 
   // Not copyable or movable
   NarwhalDevice(const NarwhalDevice &) = delete;
-  void operator=(const NarwhalDevice &) = delete;
+  NarwhalDevice& operator=(const NarwhalDevice &) = delete;
   NarwhalDevice(NarwhalDevice &&) = delete;
   NarwhalDevice &operator=(NarwhalDevice &&) = delete;
+  NarwhalDevice() = default;
 
   VkCommandPool getCommandPool() { return commandPool; }
   VkDevice device() { return device_; }

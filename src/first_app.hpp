@@ -32,11 +32,14 @@ namespace narwhal {
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
+		void freeCommandBuffers();
 		void drawFrame();
+		void recreateSwapChain();
+		void recordCommandBuffer(int imageIndex);
 		
 		NarwhalWindow narwhalWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		NarwhalDevice narwhalDevice{ narwhalWindow };
-		NarwhalSwapChain narwhalSwapChain{ narwhalDevice, narwhalWindow.getExtent()};
+		std::unique_ptr<NarwhalSwapChain> narwhalSwapChain;
 		std::unique_ptr<NarwhalPipeline> narwhalPipeline;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;

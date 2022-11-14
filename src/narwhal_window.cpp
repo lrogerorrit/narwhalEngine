@@ -25,9 +25,18 @@ namespace narwhal {
 		glfwInit();
 
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 		window = glfwCreateWindow(width, height, windowName.c_str(), nullptr, nullptr);
+		glfwSetWindowUserPointer(window, this); //Gets the pointer to the window
+		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback); //When window resized, call framebufferResizeCallback
 	}
 
+	void NarwhalWindow::framebufferResizeCallback(GLFWwindow* window, int width, int height)
+	{
+		auto narwhalWindow= reinterpret_cast<NarwhalWindow*>(glfwGetWindowUserPointer(window));
+		narwhalWindow->framebufferResized = true;
+		narwhalWindow->width = width;
+		narwhalWindow->height = height;
+	}
 }
