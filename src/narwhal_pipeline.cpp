@@ -1,6 +1,8 @@
 #include "narwhal_pipeline.hpp"
 #include "utils/utils.hpp"
 
+#include "narwhal_model.hpp"
+
 //std
 
 #include <stdexcept>
@@ -54,11 +56,15 @@ namespace narwhal {
 			shaderStages[1].pSpecializationInfo = nullptr;
 			
 
+			auto bindingDescriptions = NarwhalModel::Vertex::getBindingDescriptions();
+			auto attributeDescriptions = NarwhalModel::Vertex::getAttributeDescriptions();
+
 			VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 			vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-			vertexInputInfo.vertexAttributeDescriptionCount = 0;
-			vertexInputInfo.vertexBindingDescriptionCount = 0;
-			vertexInputInfo.pVertexBindingDescriptions = nullptr;
+			vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+			vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
+			vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+			vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
 			
 			

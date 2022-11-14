@@ -4,6 +4,7 @@
 #include "narwhal_pipeline.hpp"
 #include "narwhal_device.hpp"
 #include "narwhal_swap_chain.hpp"
+#include "narwhal_model.hpp"
 
 //std
 #include <memory>
@@ -27,6 +28,7 @@ namespace narwhal {
 		void run();
 
 	private:
+		void loadModels();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -38,6 +40,7 @@ namespace narwhal {
 		std::unique_ptr<NarwhalPipeline> narwhalPipeline;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;
+		std::unique_ptr<NarwhalModel> narwhalModel;
 	
 	};
 

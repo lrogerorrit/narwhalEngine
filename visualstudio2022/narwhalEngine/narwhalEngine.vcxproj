@@ -154,6 +154,7 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\narwhal_device.cpp" />
+    <ClCompile Include="..\..\src\narwhal_model.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
     <ClCompile Include="..\..\src\narwhal_swap_chain.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
@@ -162,6 +163,7 @@ call compile.bat</Command>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp" />
     <ClInclude Include="..\..\src\narwhal_device.hpp" />
+    <ClInclude Include="..\..\src\narwhal_model.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
     <ClInclude Include="..\..\src\narwhal_swap_chain.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />

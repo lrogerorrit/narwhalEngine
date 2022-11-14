@@ -8,6 +8,7 @@ namespace narwhal {
 
 	FirstApp::FirstApp()
 	{
+		loadModels();
 		createPipelineLayout();
 		createPipeline();
 		createCommandBuffers();
@@ -27,6 +28,16 @@ namespace narwhal {
 		}
 		
 		vkDeviceWaitIdle(narwhalDevice.device());
+	}
+	void FirstApp::loadModels()
+	{
+		std::vector<NarwhalModel::Vertex> vertices{
+			{{.0f,-.5f}},
+			{{.5f,.5f}},
+			{{-.5f,.5f}}
+		};
+
+		narwhalModel = std::make_unique<NarwhalModel>(narwhalDevice, vertices);
 	}
 	void FirstApp::createPipelineLayout()
 	{
@@ -94,7 +105,8 @@ namespace narwhal {
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE); //Start Render pass
 
 			narwhalPipeline->bind(commandBuffers[i]);
-			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+			narwhalModel->bind(commandBuffers[i]);
+			narwhalModel->draw(commandBuffers[i]);
 
 			vkCmdEndRenderPass(commandBuffers[i]); //End render pass
 			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
