@@ -1,10 +1,10 @@
 #pragma once
 
 #include "narwhal_window.hpp"
-#include "narwhal_pipeline.hpp"
 #include "narwhal_device.hpp"
-#include "narwhal_swap_chain.hpp"
-#include "narwhal_model.hpp"
+#include "narwhal_renderer.hpp"
+
+#include "narwhal_game_object.hpp"
 
 //std
 #include <memory>
@@ -28,22 +28,13 @@ namespace narwhal {
 		void run();
 
 	private:
-		void loadModels();
-		void createPipelineLayout();
-		void createPipeline();
-		void createCommandBuffers();
-		void freeCommandBuffers();
-		void drawFrame();
-		void recreateSwapChain();
-		void recordCommandBuffer(int imageIndex);
+		void loadGameObjects();
 		
 		NarwhalWindow narwhalWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
 		NarwhalDevice narwhalDevice{ narwhalWindow };
-		std::unique_ptr<NarwhalSwapChain> narwhalSwapChain;
-		std::unique_ptr<NarwhalPipeline> narwhalPipeline;
-		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffers;
-		std::unique_ptr<NarwhalModel> narwhalModel;
+		NarwhalRenderer narwhalRenderer{ narwhalWindow, narwhalDevice };
+			
+		std::vector<NarwhalGameObject> gameObjects;
 	
 	};
 

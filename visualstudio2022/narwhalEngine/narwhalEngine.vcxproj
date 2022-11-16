@@ -154,19 +154,25 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\narwhal_device.cpp" />
+    <ClCompile Include="..\..\src\narwhal_game_object.cpp" />
     <ClCompile Include="..\..\src\narwhal_model.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
+    <ClCompile Include="..\..\src\narwhal_renderer.cpp" />
     <ClCompile Include="..\..\src\narwhal_swap_chain.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
+    <ClCompile Include="..\..\src\simple_render_system.cpp" />
     <ClCompile Include="..\..\src\utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp" />
     <ClInclude Include="..\..\src\narwhal_device.hpp" />
+    <ClInclude Include="..\..\src\narwhal_game_object.hpp" />
     <ClInclude Include="..\..\src\narwhal_model.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
+    <ClInclude Include="..\..\src\narwhal_renderer.hpp" />
     <ClInclude Include="..\..\src\narwhal_swap_chain.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />
+    <ClInclude Include="..\..\src\simple_render_system.hpp" />
     <ClInclude Include="..\..\src\utils\utils.hpp" />
   </ItemGroup>
   <ItemGroup>
