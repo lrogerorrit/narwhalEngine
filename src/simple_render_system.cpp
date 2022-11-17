@@ -14,8 +14,7 @@
 namespace narwhal {
 
 	struct SimplePushConstantData {
-		glm::mat2 transform{ 1.f }; //Identity matrix with 
-		glm::vec2 offset;
+		glm::mat4 transform{ 1.f }; //Identity matrix 
 		alignas(16) glm::vec3 color; //See: https://registry.khronos.org/vulkan/specs/1.2/html/chap15.html#interfaces-resources-layout
 	};
 
@@ -69,11 +68,12 @@ namespace narwhal {
 		narwhalPipeline->bind(commandBuffer);
 
 		for (auto& obj : gameObjects) {
-			obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + .001f, glm::two_pi<float>());
+			
+			obj.transform.rotation.y = glm::mod(obj.transform.rotation.y + .001f, glm::two_pi<float>());
+			obj.transform.rotation.x = glm::mod(obj.transform.rotation.x + .0005f, glm::two_pi<float>());
 			SimplePushConstantData push{};
-			push.offset = obj.transform2d.translation;
 			push.color = obj.color;
-			push.transform = obj.transform2d.mat2();
+			push.transform = obj.transform.mat4();
 
 			vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 			obj.model->bind(commandBuffer);
