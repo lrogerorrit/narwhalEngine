@@ -106,14 +106,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\src\shaders\simple_shader.vert">
-      <Filter>shaders\vertex</Filter>
-    </None>
-    <None Include="..\..\src\shaders\simple_shader.frag">
-      <Filter>shaders\fragment</Filter>
-    </None>
     <None Include="..\..\src\compile.bat">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\..\data\shaders\simple_shader.frag">
+      <Filter>shaders\fragment</Filter>
+    </None>
+    <None Include="..\..\data\shaders\simple_shader.vert">
+      <Filter>shaders\vertex</Filter>
     </None>
   </ItemGroup>
 </Project>

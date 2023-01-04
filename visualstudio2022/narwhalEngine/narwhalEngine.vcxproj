@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -133,7 +133,7 @@ call compile.bat</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -180,9 +180,9 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\utils\utils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\data\shaders\simple_shader.frag" />
+    <None Include="..\..\data\shaders\simple_shader.vert" />
     <None Include="..\..\src\compile.bat" />
-    <None Include="..\..\src\shaders\simple_shader.frag" />
-    <None Include="..\..\src\shaders\simple_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
