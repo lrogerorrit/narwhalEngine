@@ -1,5 +1,6 @@
 #include "first_app.hpp"
 
+#include "keyboard_movement_controller.hpp"
 #include "narwhal_camera.hpp"
 #include "simple_render_system.hpp"
 
@@ -13,6 +14,9 @@
 #include <stdexcept>
 #include <array>
 #include <iostream>
+#include <chrono>
+
+#define MAX_FRAME_TIME 1 //TODO: Change and tune
 
 namespace narwhal {
 
@@ -26,16 +30,30 @@ namespace narwhal {
 
 		SimpleRenderSystem simpleRenderSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass() };
 		NarwhalCamera camera{};
-        //camera.setViewDirection(glm::vec3(.0f), glm::vec3(.5f, .0f, 1.f));
-		camera.setViewTarget(glm::vec3(-1.f,-2.f,2.f), glm::vec3(0.f, 0.f, 2.5f));
+
+
+		auto viewerObject = NarwhalGameObject::createGameObject();
+        KeyboardMovementController cameraController{};
 
 		std::cout << "maxPushConstantSize = " << narwhalDevice.properties.limits.maxPushConstantsSize << std::endl;
+        
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
 		while (!narwhalWindow.shouldClose())
 		{
 			glfwPollEvents();
 
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime= std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			currentTime = newTime;
+
+            frameTime = glm::min(frameTime, MAX_FRAME_TIME);
+            
+            cameraController.moveInPlaneXZ(narwhalWindow.getGLFWwindow(), frameTime, viewerObject);
+			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+            
             float aspect = narwhalRenderer.getAspectRatio();
-		    //camera.setOrthographicProjection(-aspect,aspect,-1,1,-1,1
+	
 			camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10.f);
 			
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
