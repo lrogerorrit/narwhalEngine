@@ -18,9 +18,11 @@
     </Filter>
     <Filter Include="shaders\vertex">
       <UniqueIdentifier>{6b685550-be49-40db-a511-bfc8ac93124c}</UniqueIdentifier>
+      <Extensions>vert</Extensions>
     </Filter>
     <Filter Include="shaders\fragment">
       <UniqueIdentifier>{49de49b5-b5c1-46a5-b787-befd59bccc9c}</UniqueIdentifier>
+      <Extensions>frag</Extensions>
     </Filter>
     <Filter Include="utils">
       <UniqueIdentifier>{4497b46f-a3e7-4a34-a448-771eff13366d}</UniqueIdentifier>
@@ -109,11 +111,13 @@
     <None Include="..\..\src\compile.bat">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\..\data\shaders\simple_shader.frag">
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\fragment</Filter>
-    </None>
-    <None Include="..\..\data\shaders\simple_shader.vert">
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\vertex</Filter>
-    </None>
+    </CustomBuild>
   </ItemGroup>
 </Project>
