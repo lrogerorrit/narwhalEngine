@@ -74,7 +74,7 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-# *.obj
+*.obj
 *.iobj
 *.pch
 *.pdb
@@ -396,3 +396,7 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+
+# Notepad ++ backup files
+*.bak
