@@ -6,12 +6,18 @@
 
 
 namespace narwhal {
-	NarwhalModel::NarwhalModel(NarwhalDevice& device, const std::vector<Vertex>& vertices) :narwhalDevice{ device } {
-		createVertexBuffers(vertices);
+	NarwhalModel::NarwhalModel(NarwhalDevice& device, const NarwhalModel::Builder& builder) :narwhalDevice{ device } {
+		createVertexBuffers(builder.vertices);
+		createIndexBuffers(builder.indices);
 	}
 	NarwhalModel::~NarwhalModel() {
 		vkDestroyBuffer(narwhalDevice.device(), vertexBuffer, nullptr);
 		vkFreeMemory(narwhalDevice.device(), vertexBufferMemory, nullptr);
+		
+		if (hasIndexBuffer) {
+			vkDestroyBuffer(narwhalDevice.device(), indexBuffer, nullptr);
+			vkFreeMemory(narwhalDevice.device(), indexBufferMemory, nullptr);
+		}
 	}
 	
 
@@ -21,26 +27,91 @@ namespace narwhal {
 		assert(vertexCount >= 3 && "Vertex count must be at least 3!");
 		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexCount;
 
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+		
+
 		narwhalDevice.createBuffer(bufferSize,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			vertexBuffer,
-			vertexBufferMemory);
+			stagingBuffer,
+			stagingBufferMemory);
 		
 		void* data;
 
-		vkMapMemory(narwhalDevice.device(), vertexBufferMemory, 0, bufferSize, 0, &data);
+		vkMapMemory(narwhalDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
 		memcpy(data, vertices.data(), static_cast<size_t>(bufferSize)); //Copies memory from cpu to gpu
-		vkUnmapMemory(narwhalDevice.device(), vertexBufferMemory);
+		vkUnmapMemory(narwhalDevice.device(), stagingBufferMemory);
+
+		narwhalDevice.createBuffer(bufferSize,
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			vertexBuffer, 
+			vertexBufferMemory);
+		
+		// Copy from staging buffer to vertex buffer
+		narwhalDevice.copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
+		
+		// Cleanup staging buffer
+		vkDestroyBuffer(narwhalDevice.device(), stagingBuffer, nullptr);
+		vkFreeMemory(narwhalDevice.device(), stagingBufferMemory, nullptr);
 	}
+	
+	void NarwhalModel::createIndexBuffers(const std::vector<uint32_t>& indices)
+	{
+		indexCount = static_cast<uint32_t> (indices.size());
+		hasIndexBuffer = indexCount > 0;
+		if (!hasIndexBuffer) return;
+		
+		VkDeviceSize bufferSize = sizeof(indices[0]) * indexCount;
+
+		VkBuffer stagingBuffer;
+		VkDeviceMemory stagingBufferMemory;
+
+
+		narwhalDevice.createBuffer(bufferSize,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+			stagingBuffer,
+			stagingBufferMemory);
+
+		void* data;
+
+		vkMapMemory(narwhalDevice.device(), stagingBufferMemory, 0, bufferSize, 0, &data);
+		memcpy(data, indices.data(), static_cast<size_t>(bufferSize)); //Copies memory from cpu to gpu
+		vkUnmapMemory(narwhalDevice.device(), stagingBufferMemory);
+
+		narwhalDevice.createBuffer(bufferSize,
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			indexBuffer,
+			indexBufferMemory);
+
+		// Copy from staging buffer to vertex buffer
+		narwhalDevice.copyBuffer(stagingBuffer, indexBuffer, bufferSize);
+
+		// Cleanup staging buffer
+		vkDestroyBuffer(narwhalDevice.device(), stagingBuffer, nullptr);
+		vkFreeMemory(narwhalDevice.device(), stagingBufferMemory, nullptr);
+	}
+	
+	
 	void NarwhalModel::bind(VkCommandBuffer commandBuffer)
 	{
 		VkBuffer buffers[] = { vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, buffers, offsets);
+
+		if (hasIndexBuffer) {
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		}
 	}
 	void NarwhalModel::draw(VkCommandBuffer commandBuffer) {
-		vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		if (hasIndexBuffer) {
+			vkCmdDrawIndexed(commandBuffer, indexCount, 1, 0, 0, 0);
+		}else {
+			vkCmdDraw(commandBuffer, vertexCount, 1, 0, 0);
+		}
 	}
 	
 	std::vector<VkVertexInputBindingDescription> NarwhalModel::Vertex::getBindingDescriptions()
