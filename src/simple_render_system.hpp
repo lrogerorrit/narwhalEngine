@@ -1,10 +1,8 @@
 #pragma once
 
-
 #include "narwhal_pipeline.hpp"
 #include "narwhal_device.hpp"
-
-
+#include "narwhal_camera.hpp"
 #include "narwhal_game_object.hpp"
 
 //std
@@ -27,7 +25,7 @@ namespace narwhal {
 
 		
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<NarwhalGameObject>& gameObjects);
+		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<NarwhalGameObject>& gameObjects, const NarwhalCamera& camera);
 	private:
 		
 		void createPipelineLayout();

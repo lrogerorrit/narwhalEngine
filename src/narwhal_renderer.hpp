@@ -26,6 +26,7 @@ namespace narwhal {
 		NarwhalRenderer& operator=(const NarwhalRenderer&) = delete;
 
 		VkRenderPass getSwapChainRenderPass() const { return narwhalSwapChain->getRenderPass(); }
+		float getAspectRatio() const { return narwhalSwapChain->extentAspectRatio(); }
 		bool isFrameInProgress() const { return isFrameStarted; }
 		
 		VkCommandBuffer getCurrentCommandBuffer() const {
