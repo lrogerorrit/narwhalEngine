@@ -3,8 +3,8 @@
 #include "narwhal_window.hpp"
 #include "narwhal_device.hpp"
 #include "narwhal_renderer.hpp"
-
 #include "narwhal_game_object.hpp"
+#include "narwhal_descriptors.hpp"
 
 //std
 #include <memory>
@@ -30,10 +30,12 @@ namespace narwhal {
 	private:
 		void loadGameObjects();
 		
-		NarwhalWindow narwhalWindow{ WIDTH, HEIGHT, "Hello Vulkan!" };
+		NarwhalWindow narwhalWindow{ WIDTH, HEIGHT, "Narwhal Engine" };
 		NarwhalDevice narwhalDevice{ narwhalWindow };
 		NarwhalRenderer narwhalRenderer{ narwhalWindow, narwhalDevice };
-			
+		
+		// note: order of declarations matters
+		std::unique_ptr<NarwhalDescriptorPool> globalPool{};
 		std::vector<NarwhalGameObject> gameObjects;
 	
 	};

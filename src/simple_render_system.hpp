@@ -4,6 +4,7 @@
 #include "narwhal_device.hpp"
 #include "narwhal_camera.hpp"
 #include "narwhal_game_object.hpp"
+#include "narwhal_frame_info.hpp"
 
 //std
 #include <memory>
@@ -17,7 +18,7 @@ namespace narwhal {
 	public:
 
 
-		SimpleRenderSystem(NarwhalDevice& device, VkRenderPass renderPass);
+		SimpleRenderSystem(NarwhalDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
 		~SimpleRenderSystem();
 
 		SimpleRenderSystem(const SimpleRenderSystem&) = delete;
@@ -25,10 +26,10 @@ namespace narwhal {
 
 		
 
-		void renderGameObjects(VkCommandBuffer commandBuffer, std::vector<NarwhalGameObject>& gameObjects, const NarwhalCamera& camera);
+		void renderGameObjects(FrameInfo& frameInfo,std::vector<NarwhalGameObject>& gameObjects);
 	private:
 		
-		void createPipelineLayout();
+		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass);
 
 		NarwhalDevice &narwhalDevice;

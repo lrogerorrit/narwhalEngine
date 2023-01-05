@@ -1,6 +1,7 @@
 #pragma once
 
 #include "narwhal_device.hpp"
+#include "narwhal_buffer.hpp"
 
 //libs
 #define GLM_FORCE_RADIANS
@@ -58,13 +59,11 @@ namespace narwhal {
 		
 		NarwhalDevice& narwhalDevice;
 		
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
+		std::unique_ptr<NarwhalBuffer> vertexBuffer;
 		uint32_t vertexCount;
 		
 		bool hasIndexBuffer = false;
-		VkBuffer indexBuffer;
-		VkDeviceMemory indexBufferMemory;
+		std::unique_ptr<NarwhalBuffer> indexBuffer;
 		uint32_t indexCount;
 		
 		
