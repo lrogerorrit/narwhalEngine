@@ -1,6 +1,7 @@
 #pragma once
 
 #include "narwhal_camera.hpp"
+#include "narwhal_game_object.hpp"
 
 // lib
 #include <vulkan/vulkan.h>
@@ -12,5 +13,6 @@ namespace narwhal {
 		VkCommandBuffer commandBuffer;
 		NarwhalCamera camera;
 		VkDescriptorSet globalDescriptorSet;
+		NarwhalGameObject::Map& gameObjects;
 	};
 }

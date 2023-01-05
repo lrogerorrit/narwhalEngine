@@ -7,6 +7,7 @@
 
 //std
 #include <memory>
+#include <unordered_map>
 
 namespace narwhal {
 
@@ -27,6 +28,7 @@ namespace narwhal {
 	{
 	public:
 		using id_t = unsigned int;
+		using Map = std::unordered_map<id_t, NarwhalGameObject>;
 
 		static NarwhalGameObject createGameObject() {
 			static id_t currentId = 0;

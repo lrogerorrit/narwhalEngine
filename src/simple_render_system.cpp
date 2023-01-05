@@ -66,12 +66,13 @@ namespace narwhal {
 	}
 
 
-	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<NarwhalGameObject>& gameObjects){
+	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo){
 		narwhalPipeline->bind(frameInfo.commandBuffer);
 
 
 		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
-		for (auto& obj : gameObjects) {
+		for (auto& kv : frameInfo.gameObjects) {
+			auto& obj = kv.second;
 			
 
 			SimplePushConstantData push{};

@@ -21,10 +21,14 @@
 #define MAX_FRAME_TIME 1.f //TODO: Change and tune
 
 namespace narwhal {
-
+	//For more alignment info check here:	https://registry.khronos.org/vulkan/specs/1.0-wsi_extensions/html/vkspec.html#interfaces-resources-layout
+	//										https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 	struct GlobalUbo {
-		alignas(16) glm::mat4 projectionView{ 1.f };
-		alignas(16) glm::vec3 lightDirection = glm::normalize(glm::vec3{ 1.f, -3.f, -1.f });
+		glm::mat4 projectionView{ 1.f };
+		glm::vec4 ambientLightColor{ 1.f,1.f,1.f,.02f }; //w is intensity
+		glm::vec3 lightPosition{ -1.f };
+		alignas(16) glm::vec4 lightColor{ 1.f }; // w is light intensity;
+		
 	};
 
 	FirstApp::FirstApp() {
@@ -46,7 +50,7 @@ namespace narwhal {
 		}
 		
 		auto globalSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -62,6 +66,7 @@ namespace narwhal {
 
 
 		auto viewerObject = NarwhalGameObject::createGameObject();
+		viewerObject.transform.translation.z = -2.5f;
 		KeyboardMovementController cameraController{};
 
 		//std::cout << "maxPushConstantSize = " << narwhalDevice.properties.limits.maxPushConstantsSize << std::endl; 
@@ -87,7 +92,7 @@ namespace narwhal {
 
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
-				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex]};
+				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],gameObjects};
 
 				//Update
 				GlobalUbo ubo{};
@@ -97,7 +102,7 @@ namespace narwhal {
 
 				// Render
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+				simpleRenderSystem.renderGameObjects(frameInfo);
 				narwhalRenderer.endSwapChainRenderPass(commandBuffer);
 				narwhalRenderer.endFrame();
 
@@ -115,18 +120,26 @@ namespace narwhal {
 
 		auto flatVase = NarwhalGameObject::createGameObject();
 		flatVase.model = cubeModel;
-		flatVase.transform.translation = { -.5f,.5f,2.5f };
+		flatVase.transform.translation = { -.5f,.5f,0.f };
 		flatVase.transform.scale = glm::vec3({ 3.f,1.5f,3.f });
 
-		gameObjects.push_back(std::move(flatVase));
+		gameObjects.emplace(flatVase.getId(), std::move(flatVase));
 
 		cubeModel = NarwhalModel::createModelFromFile(narwhalDevice, "data/models/smooth_vase.obj");
 		auto smoothVase = NarwhalGameObject::createGameObject();
 		smoothVase.model = cubeModel;
-		smoothVase.transform.translation = { .5f,.5f,2.5f };
+		smoothVase.transform.translation = { .5f,.5f,.0f };
 		smoothVase.transform.scale = glm::vec3({ 3.f,1.5f,3.f });
 
-		gameObjects.push_back(std::move(smoothVase));
+		gameObjects.emplace(smoothVase.getId(), std::move(smoothVase));
+
+		cubeModel = NarwhalModel::createModelFromFile(narwhalDevice, "data/models/quad.obj");
+		auto floor = NarwhalGameObject::createGameObject();
+		floor.model = cubeModel;
+		floor.transform.translation = {0.f,.5f,0.f };
+		floor.transform.scale = glm::vec3({ 3.f,1.f,3.f });
+
+		gameObjects.emplace(floor.getId(), std::move(floor));
 
 	}
 

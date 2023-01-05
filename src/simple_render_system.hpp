@@ -26,7 +26,7 @@ namespace narwhal {
 
 		
 
-		void renderGameObjects(FrameInfo& frameInfo,std::vector<NarwhalGameObject>& gameObjects);
+		void renderGameObjects(FrameInfo& frameInfo);
 	private:
 		
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
