@@ -16,6 +16,7 @@ namespace narwhal {
 	struct SimplePushConstantData {
 		glm::mat4 modelMatrix{ 1.f }; //Identity matrix 
 		//alignas(16) glm::vec3 color; //See: https://registry.khronos.org/vulkan/specs/1.2/html/chap15.html#interfaces-resources-layout
+										// https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 		glm::mat4 normalMatrix{ 1.f };
 	};
 
@@ -73,7 +74,7 @@ namespace narwhal {
 		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 		for (auto& kv : frameInfo.gameObjects) {
 			auto& obj = kv.second;
-			
+			if (obj.model == nullptr) continue;
 
 			SimplePushConstantData push{};
 			push.modelMatrix = obj.transform.mat4();

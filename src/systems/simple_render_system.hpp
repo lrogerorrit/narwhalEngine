@@ -1,10 +1,10 @@
 #pragma once
 
-#include "narwhal_pipeline.hpp"
-#include "narwhal_device.hpp"
-#include "narwhal_camera.hpp"
-#include "narwhal_game_object.hpp"
-#include "narwhal_frame_info.hpp"
+#include "../narwhal_pipeline.hpp"
+#include "../narwhal_device.hpp"
+#include "../narwhal_camera.hpp"
+#include "../narwhal_game_object.hpp"
+#include "../narwhal_frame_info.hpp"
 
 //std
 #include <memory>

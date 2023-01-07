@@ -27,6 +27,9 @@
     <Filter Include="utils">
       <UniqueIdentifier>{4497b46f-a3e7-4a34-a448-771eff13366d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="systems">
+      <UniqueIdentifier>{ca3e693c-bbfe-4c82-97ed-0fea293c041d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cpp">
@@ -59,9 +62,6 @@
     <ClCompile Include="..\..\src\narwhal_renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\simple_render_system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\narwhal_camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -73,6 +73,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\narwhal_descriptors.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\systems\point_light_system.cpp">
+      <Filter>systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\systems\simple_render_system.cpp">
+      <Filter>systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,9 +109,6 @@
     <ClInclude Include="..\..\src\narwhal_renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\simple_render_system.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\narwhal_camera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,6 +123,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\narwhal_descriptors.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\systems\simple_render_system.hpp">
+      <Filter>systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\systems\point_light_system.hpp">
+      <Filter>systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

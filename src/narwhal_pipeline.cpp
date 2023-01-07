@@ -56,8 +56,8 @@ namespace narwhal {
 			shaderStages[1].pSpecializationInfo = nullptr;
 			
 
-			auto bindingDescriptions = NarwhalModel::Vertex::getBindingDescriptions();
-			auto attributeDescriptions = NarwhalModel::Vertex::getAttributeDescriptions();
+			auto bindingDescriptions = configInfo.bindingDescriptions; //NarwhalModel::Vertex::getBindingDescriptions();
+			auto attributeDescriptions = configInfo.attributeDescriptions;//NarwhalModel::Vertex::getAttributeDescriptions();
 
 			VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
 			vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -192,5 +192,8 @@ namespace narwhal {
 			configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 			configInfo.dynamicStateInfo.flags = 0;
 			
+
+			configInfo.bindingDescriptions = NarwhalModel::Vertex::getBindingDescriptions();
+			configInfo.attributeDescriptions = NarwhalModel::Vertex::getAttributeDescriptions();
 		}
 }
