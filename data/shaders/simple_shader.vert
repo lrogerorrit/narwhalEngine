@@ -20,6 +20,7 @@ struct PointLight{
 layout(set=0,binding=0) uniform GlobalUbo{
 	mat4 projection;
 	mat4 view;
+	mat4 invView;
 	vec4 ambientLightColor; // w is intensity
 	PointLight PointLights[NUM_POINT_LIGHTS]; //TODO: Replace 10 with specialization constant
 	int numLights;
