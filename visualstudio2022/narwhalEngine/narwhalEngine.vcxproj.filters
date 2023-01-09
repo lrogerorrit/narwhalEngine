@@ -30,6 +30,13 @@
     <Filter Include="systems">
       <UniqueIdentifier>{ca3e693c-bbfe-4c82-97ed-0fea293c041d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{779f8ae4-0f36-4ab4-8b51-28efd3fa3081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\imgui">
+      <UniqueIdentifier>{e8ffcd6d-9088-4f66-8831-0dbbd5fe6a65}</UniqueIdentifier>
+      <Extensions>cpp;hpp;h</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cpp">
@@ -78,6 +85,30 @@
       <Filter>systems</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\systems\simple_render_system.cpp">
+      <Filter>systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_demo.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_draw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_impl_glfw.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_impl_vulkan.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_tables.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp">
+      <Filter>external\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp">
       <Filter>systems</Filter>
     </ClCompile>
   </ItemGroup>
@@ -130,6 +161,33 @@
     <ClInclude Include="..\..\src\systems\point_light_system.hpp">
       <Filter>systems</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imgui.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imgui_impl_glfw.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imgui_impl_vulkan.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imgui_internal.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imstb_rectpack.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imstb_textedit.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imstb_truetype.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\external\imgui\imconfig.h">
+      <Filter>external\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp">
+      <Filter>systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\compile.bat">
@@ -139,6 +197,21 @@
   <ItemGroup>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\vertex</Filter>

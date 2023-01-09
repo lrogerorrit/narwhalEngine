@@ -4,13 +4,18 @@
 #include "narwhal_camera.hpp"
 #include "systems/simple_render_system.hpp"
 #include "systems/point_light_system.hpp"
+#include "systems/narwhal_imgui.hpp"
 #include "narwhal_buffer.hpp"
+
 
 //libs
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 
 //std
 #include <stdexcept>
@@ -38,6 +43,13 @@ namespace narwhal {
 
 	void FirstApp::run()
 	{
+		// create imgui, and pass in dependencies
+		NarwhalImgui narwhalImgui{
+			narwhalDevice,
+			narwhalWindow,
+			narwhalRenderer.getSwapChainRenderPass(),
+			narwhalRenderer.getImageCount() };
+		
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (int i = 0; i < uboBuffers.size(); i++) {
 			uboBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
@@ -79,6 +91,8 @@ namespace narwhal {
 
 			frameTime = glm::min(frameTime, MAX_FRAME_TIME);
 
+			narwhalImgui.newFrame();
+
 			cameraController.moveInPlaneXZ(narwhalWindow.getGLFWwindow(), frameTime, viewerObject);
 			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
@@ -103,9 +117,17 @@ namespace narwhal {
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderGameObjects(frameInfo);
 				pointLightSystem.render(frameInfo);
+				
+
+				//TODO: REMOVE
+				ImGui::Begin("Test");
+				ImGui::Text("Hello World");
+				ImGui::End();
+				
+				narwhalImgui.render(frameInfo);
+
 				narwhalRenderer.endSwapChainRenderPass(commandBuffer);
 				narwhalRenderer.endFrame();
-
 			}
 		}
 

@@ -141,7 +141,7 @@ call compile.bat</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;C:\Users\roger\Documents\TFG\engine\narwhalEngine\external\imgui;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -159,6 +159,13 @@ call compile.bat</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\external\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\external\imgui\imgui_demo.cpp" />
+    <ClCompile Include="..\..\external\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\external\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="..\..\external\imgui\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\keyboard_movement_controller.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
@@ -172,11 +179,20 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\narwhal_renderer.cpp" />
     <ClCompile Include="..\..\src\narwhal_swap_chain.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
+    <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp" />
     <ClCompile Include="..\..\src\systems\point_light_system.cpp" />
     <ClCompile Include="..\..\src\systems\simple_render_system.cpp" />
     <ClCompile Include="..\..\src\utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\external\imgui\imconfig.h" />
+    <ClInclude Include="..\..\external\imgui\imgui.h" />
+    <ClInclude Include="..\..\external\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="..\..\external\imgui\imgui_impl_vulkan.h" />
+    <ClInclude Include="..\..\external\imgui\imgui_internal.h" />
+    <ClInclude Include="..\..\external\imgui\imstb_rectpack.h" />
+    <ClInclude Include="..\..\external\imgui\imstb_textedit.h" />
+    <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
     <ClInclude Include="..\..\src\first_app.hpp" />
     <ClInclude Include="..\..\src\keyboard_movement_controller.hpp" />
     <ClInclude Include="..\..\src\narwhal_buffer.hpp" />
@@ -190,6 +206,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\narwhal_renderer.hpp" />
     <ClInclude Include="..\..\src\narwhal_swap_chain.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />
+    <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp" />
     <ClInclude Include="..\..\src\systems\point_light_system.hpp" />
     <ClInclude Include="..\..\src\systems\simple_render_system.hpp" />
     <ClInclude Include="..\..\src\utils\utils.hpp" />
