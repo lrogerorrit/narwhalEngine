@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;../../external/imgui;../libs/include/stb-master;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,7 +142,7 @@ call compile.bat</Command>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.231.1\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;C:\Users\roger\Documents\TFG\engine\narwhalEngine\external\imgui;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VULKAN_SDK)\Include;../libs/include/glfw-3.3.8.bin.WIN64/include;../libs/include/glm;../../external/imgui;../libs/include/stb-master;../libs/include/tinyobjloader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -174,6 +175,7 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\narwhal_descriptors.cpp" />
     <ClCompile Include="..\..\src\narwhal_device.cpp" />
     <ClCompile Include="..\..\src\narwhal_game_object.cpp" />
+    <ClCompile Include="..\..\src\narwhal_Image.cpp" />
     <ClCompile Include="..\..\src\narwhal_model.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
     <ClCompile Include="..\..\src\narwhal_renderer.cpp" />
@@ -201,6 +203,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\narwhal_device.hpp" />
     <ClInclude Include="..\..\src\narwhal_frame_info.hpp" />
     <ClInclude Include="..\..\src\narwhal_game_object.hpp" />
+    <ClInclude Include="..\..\src\narwhal_Image.hpp" />
     <ClInclude Include="..\..\src\narwhal_model.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
     <ClInclude Include="..\..\src\narwhal_renderer.hpp" />

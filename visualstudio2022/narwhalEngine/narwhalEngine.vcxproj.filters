@@ -111,6 +111,9 @@
     <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp">
       <Filter>systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\narwhal_Image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp">
@@ -187,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp">
       <Filter>systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\narwhal_Image.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
