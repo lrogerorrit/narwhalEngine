@@ -63,7 +63,7 @@ namespace narwhal {
 			
 
 			void loadModel(const std::string& filepath);
-			void loadModelV2(const std::string& filepath);
+			
 		};
 
 		NarwhalModel(NarwhalDevice& device, const NarwhalModel::Builder& builder);
