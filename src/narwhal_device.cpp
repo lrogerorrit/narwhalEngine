@@ -131,8 +131,13 @@ namespace narwhal {
 			throw std::runtime_error("failed to find a suitable GPU!");
 		}
 
+		//Calculate Device Properties
 		vkGetPhysicalDeviceProperties(physicalDevice, &properties);
 		std::cout << "physical device: " << properties.deviceName << std::endl;
+		
+		//Calculate Device Features
+		vkGetPhysicalDeviceFeatures(physicalDevice, &features);
+		
 	}
 
 	void NarwhalDevice::createLogicalDevice() {

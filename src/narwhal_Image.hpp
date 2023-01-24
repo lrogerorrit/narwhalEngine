@@ -17,7 +17,7 @@ namespace narwhal {
 	{
 	public:
 		NarwhalImage(NarwhalDevice& device,std::string name);
-		
+		~NarwhalImage();
 		
 		void loadImage(const std::string& filename);
 
@@ -25,7 +25,11 @@ namespace narwhal {
 		std::string name;
 
 		void createTexureImage(const std::string& filename);
+		void createTextureImageView(VkFormat format);
 		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
+		void createTextureSampler();
+		
+		VkImageView createImageView(VkFormat format, VkImageAspectFlags aspectFlags);
 
 		NarwhalDevice& narwhalDevice;
 
@@ -33,7 +37,9 @@ namespace narwhal {
 		VkDeviceSize imageSize;
 		
 		VkImage image= nullptr;
+		VkImageView imageView = nullptr;
 		VkDeviceMemory imageMemory=nullptr;
+		VkSampler textureSampler = nullptr;
 	
 	};
 }

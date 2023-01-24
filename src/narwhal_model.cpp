@@ -36,7 +36,7 @@ namespace narwhal {
 		createIndexBuffers(builder.indices);
 		createMaterialColorBuffers(builder.materials);
 		createMaterialIndexBuffers(builder.materialIndices);
-
+		
 		// Create Textures
 		auto textureOffset = static_cast<uint32_t>(builder.textureNames.size());
 		for (auto name : builder.textureNames) {

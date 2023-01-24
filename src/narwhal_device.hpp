@@ -77,6 +77,7 @@ class NarwhalDevice {
   void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
   VkPhysicalDeviceProperties properties;
+  VkPhysicalDeviceFeatures features;
 
  private:
   void createInstance();
