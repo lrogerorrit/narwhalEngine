@@ -9,6 +9,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
+
+
 //std
 #include <cassert>
 #include <cstring>
@@ -30,6 +32,8 @@ namespace narwhal {
 	NarwhalModel::NarwhalModel(NarwhalDevice& device, const NarwhalModel::Builder& builder) :narwhalDevice{ device } {
 		createVertexBuffers(builder.vertices);
 		createIndexBuffers(builder.indices);
+		createMaterialColorBuffers(builder.materials);
+		createMaterialIndexBuffers(builder.materialIndices);
 	}
 	NarwhalModel::~NarwhalModel() {
 
@@ -102,6 +106,73 @@ namespace narwhal {
 		narwhalDevice.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	}
 
+	void NarwhalModel::createMaterialColorBuffers(const std::vector<MaterialObj>& materials) {
+		materialColorCount = static_cast<uint32_t> (materials.size());
+		hasMaterialColorBuffer = materialColorCount > 0;
+		if (!hasIndexBuffer) return;
+		
+		VkDeviceSize bufferSize = sizeof(materials[0]) * materialColorCount;
+
+		uint32_t materialSize = sizeof(materials[0]);
+
+
+		NarwhalBuffer stagingBuffer{
+			narwhalDevice,
+			materialSize,
+			materialColorCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+
+		// Map the buffer memory and copy the data
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)materials.data());
+
+		materialColorBuffer = std::make_unique<NarwhalBuffer>(
+			narwhalDevice,
+			materialSize,
+			materialColorCount,
+			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT| VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
+
+		// Copy from staging buffer to materialColor buffer
+		narwhalDevice.copyBuffer(stagingBuffer.getBuffer(), materialColorBuffer->getBuffer(), bufferSize);
+	}
+
+	void NarwhalModel::createMaterialIndexBuffers(const std::vector<uint32_t>& materialIndexes) {
+		materialIndexCount = static_cast<uint32_t> (materialIndexes.size());
+		hasMaterialIndexBuffer = materialIndexCount > 0;
+		if (!hasIndexBuffer) return;
+
+		VkDeviceSize bufferSize = sizeof(materialIndexes[0]) * materialIndexCount;
+
+		uint32_t materialIndexSize = sizeof(materialIndexes[0]);
+
+
+		NarwhalBuffer stagingBuffer{
+			narwhalDevice,
+			materialIndexSize,
+			materialIndexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+
+		// Map the buffer memory and copy the data
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)materialIndexes.data());
+
+		materialIndexBuffer = std::make_unique<NarwhalBuffer>(
+			narwhalDevice,
+			materialIndexSize,
+			materialIndexCount,
+			VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
+
+		// Copy from staging buffer to materialIndexBuffer buffer
+		narwhalDevice.copyBuffer(stagingBuffer.getBuffer(), materialIndexBuffer->getBuffer(), bufferSize);
+	}
 
 	std::unique_ptr<NarwhalModel> NarwhalModel::createModelFromFile(NarwhalDevice& device, const std::string& filepath)
 	{
@@ -147,6 +218,8 @@ namespace narwhal {
 		attributeDescriptions.push_back({ 1,0,VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex,color) }); // Color
 		attributeDescriptions.push_back({ 2,0,VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex,normal) }); // Normal
 		attributeDescriptions.push_back({ 3,0,VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex,uv) }); // UV
+		//Make material attribute description
+		
 		
 		return attributeDescriptions;
 
@@ -155,11 +228,36 @@ namespace narwhal {
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
-		std::vector<tinyobj::material_t> materials;
+		std::vector<tinyobj::material_t> materialList;
 		std::string warn, err;
-
-		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materialList, &warn, &err, filepath.c_str())) {
 			throw std::runtime_error(warn + err);
+		}
+
+		//Load obj materials
+		for (const auto & material : materialList) {
+			MaterialObj m;
+			m.ambient = glm::vec3{ material.ambient[0], material.ambient[1], material.ambient[2] };
+			m.diffuse = glm::vec3{ material.diffuse[0], material.diffuse[1], material.diffuse[2] };
+			m.specular = glm::vec3{ material.specular[0], material.specular[1], material.specular[2] };
+			m.emission = glm::vec3{ material.emission[0], material.emission[1], material.emission[2] };
+			m.transmittance = glm::vec3{ material.transmittance[0], material.transmittance[1], material.transmittance[2] };
+			m.dissolve = material.dissolve;
+			m.ior = material.ior;
+			m.shininess = material.shininess;
+			m.illum = material.illum;
+			
+			if (!material.diffuse_texname.empty()) {
+				textures.push_back(material.diffuse_texname);
+				m.textureID = static_cast<int>(textures.size()) - 1;
+					
+			}
+			materials.emplace_back(m);
+			
+		}
+
+		if (materials.empty()) {
+			materials.emplace_back(MaterialObj{});
 		}
 
 		vertices.clear();
@@ -168,6 +266,7 @@ namespace narwhal {
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{}; //Vertex, index
 		
 		for (const auto& shape : shapes) {
+			materialIndices.insert(materialIndices.end(), shape.mesh.material_ids.begin(), shape.mesh.material_ids.end()); // Add material indices
 			for (const auto index : shape.mesh.indices) {
 				Vertex vertex{};
 				if (index.vertex_index >= 0) {
@@ -210,5 +309,18 @@ namespace narwhal {
 				indices.push_back(uniqueVertices[vertex]);
 			}
 		}
+
+		// Fixing material indices
+		for (auto& mi : materialIndices)
+		{
+			if (mi < 0 || mi > materials.size())
+				mi = 0;
+		}
+
+	}
+	void NarwhalModel::Builder::loadModelV2(const std::string& filepath)  //Code from NVIDIA
+	{
+		
+		
 	}
 }
