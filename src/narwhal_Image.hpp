@@ -8,8 +8,7 @@
 //std
 #include <string>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+
 
 namespace narwhal {
 	
@@ -17,22 +16,24 @@ namespace narwhal {
 	class NarwhalImage
 	{
 	public:
-		NarwhalImage(NarwhalDevice& device);
-		~NarwhalImage();
+		NarwhalImage(NarwhalDevice& device,std::string name);
+		
 		
 		void loadImage(const std::string& filename);
 
 	private:
+		std::string name;
 
 		void createTexureImage(const std::string& filename);
+		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
 
 		NarwhalDevice& narwhalDevice;
 
 		int textureWidth, textureHeight, textureChannels;
 		VkDeviceSize imageSize;
 		
-		VkImage textureImage;
-		VkDeviceMemory textureImageMemory;
+		VkImage image= nullptr;
+		VkDeviceMemory imageMemory=nullptr;
 	
 	};
 }

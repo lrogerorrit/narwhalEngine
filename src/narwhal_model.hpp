@@ -2,6 +2,7 @@
 
 #include "narwhal_device.hpp"
 #include "narwhal_buffer.hpp"
+#include "narwhal_image.hpp"
 
 //libs
 #define GLM_FORCE_RADIANS
@@ -57,7 +58,7 @@ namespace narwhal {
 		struct Builder {
 			std::vector<Vertex> vertices{};
 			std::vector<uint32_t> indices{};
-			std::vector<std::string> textures{};
+			std::vector<std::string> textureNames{};
 			std::vector<MaterialObj> materials{};
 			std::vector<uint32_t> materialIndices{};
 			
@@ -86,7 +87,7 @@ namespace narwhal {
 
 		void createMaterialIndexBuffers(const std::vector<uint32_t>& materialIndexes);
 		
-		
+		std::vector<NarwhalImage> textures{};
 		
 		NarwhalDevice& narwhalDevice;
 		

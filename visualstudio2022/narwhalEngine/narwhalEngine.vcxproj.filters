@@ -111,7 +111,7 @@
     <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp">
       <Filter>systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\narwhal_Image.cpp">
+    <ClCompile Include="..\..\src\narwhal_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -191,7 +191,7 @@
     <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp">
       <Filter>systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\narwhal_Image.hpp">
+    <ClInclude Include="..\..\src\narwhal_image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -203,6 +203,15 @@
   <ItemGroup>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\fragment</Filter>

@@ -139,6 +139,7 @@ namespace narwhal {
 	void FirstApp::loadGameObjects()
 	{
 		std::shared_ptr<NarwhalModel> cubeModel = NarwhalModel::createModelFromFile(narwhalDevice, "data/models/flat_vase.obj");
+		
 
 		auto flatVase = NarwhalGameObject::createGameObject();
 		flatVase.model = cubeModel;

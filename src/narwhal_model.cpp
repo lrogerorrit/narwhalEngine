@@ -38,8 +38,13 @@ namespace narwhal {
 		createMaterialIndexBuffers(builder.materialIndices);
 
 		// Create Textures
-		auto textureOffset = static_cast<uint32_t>(builder.textures.size());
-
+		auto textureOffset = static_cast<uint32_t>(builder.textureNames.size());
+		for (auto name : builder.textureNames) {
+			NarwhalImage texture{ narwhalDevice, name };
+			std::string path = "data/textures/" + name;
+			texture.loadImage(path);
+			textures.push_back(texture);
+		}
 
 
 	}
@@ -77,6 +82,7 @@ namespace narwhal {
 
 		// Copy from staging buffer to vertex buffer
 		narwhalDevice.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+
 	}
 
 	void NarwhalModel::createIndexBuffers(const std::vector<uint32_t>& indices)
@@ -258,8 +264,8 @@ namespace narwhal {
 			m.illum = material.illum;
 
 			if (!material.diffuse_texname.empty()) {
-				textures.push_back(material.diffuse_texname);
-				m.textureID = static_cast<int>(textures.size()) - 1;
+				textureNames.push_back(material.diffuse_texname);
+				m.textureID = static_cast<int>(textureNames.size()) - 1;
 
 			}
 			materials.emplace_back(m);
