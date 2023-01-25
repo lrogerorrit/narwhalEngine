@@ -258,5 +258,14 @@
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
       <Filter>shaders\vertex</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>
