@@ -7,6 +7,8 @@
 #include <stdexcept>
 
 namespace narwhal {
+	VkSampler* NarwhalImage::textureSampler = nullptr;
+	std::vector<NarwhalImage*> NarwhalImage::loadedImages{};
 	NarwhalImage::NarwhalImage(NarwhalDevice& device, std::string name) : narwhalDevice{ device },
 		textureHeight{ 0 },textureWidth{ 0 },textureChannels{ 0 }, imageSize{0}
 	{
@@ -16,16 +18,49 @@ namespace narwhal {
 	}
 	NarwhalImage::~NarwhalImage()
 	{
-		vkDestroySampler(narwhalDevice.device(), textureSampler, nullptr);
+		
 		vkDestroyImageView(narwhalDevice.device(), imageView, nullptr);
 		vkDestroyImage(narwhalDevice.device() ,image, nullptr);
 		vkFreeMemory(narwhalDevice.device(), imageMemory, nullptr);
 		
 		
 	}
+
+	bool NarwhalImage::imageExist(std::string fileName)
+	{
+		for (auto image : loadedImages)
+		{
+			if (image->name == fileName)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	NarwhalImage* NarwhalImage::getImage(std::string name) {
+		for (auto image : loadedImages)
+		{
+			if (image->name == name)
+			{
+				return image;
+			}
+		}
+		return nullptr;
+		
+		
+	}
+	
 	void NarwhalImage::loadImage(const std::string& filename)
 	{
+		
 		createTexureImage(filename);
+		createTextureImageView();
+		
+		// Add this image to the loadedImages vector
+		loadedImages.push_back(this);
+		
+		
 	}
 	
 	void NarwhalImage::createTexureImage(const std::string& filename)
@@ -95,10 +130,11 @@ namespace narwhal {
 		);
 	}
 
-	void NarwhalImage::createTextureSampler()
+	void NarwhalImage::createTextureSampler(NarwhalDevice& device)
 	{
 
-		
+		VkSampler sampler;
+		textureSampler = &sampler;
 		
 
 		VkSamplerCreateInfo samplerInfo{};
@@ -111,8 +147,8 @@ namespace narwhal {
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 
 		
-		samplerInfo.anisotropyEnable = narwhalDevice.features.samplerAnisotropy?VK_TRUE:VK_FALSE;
-		samplerInfo.maxAnisotropy = narwhalDevice.properties.limits.maxSamplerAnisotropy ;
+		samplerInfo.anisotropyEnable = device.features.samplerAnisotropy?VK_TRUE:VK_FALSE;
+		samplerInfo.maxAnisotropy = device.properties.limits.maxSamplerAnisotropy ;
 		
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		
@@ -127,13 +163,13 @@ namespace narwhal {
 		samplerInfo.minLod = 0.0f;
 		samplerInfo.maxLod = 0.0f;
 
-		if (vkCreateSampler(narwhalDevice.device(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+		if (vkCreateSampler(device.device(), &samplerInfo, nullptr, textureSampler) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create texture sampler!");
 		}
 
 	}
 
-	VkImageView NarwhalImage::createImageView(VkFormat format, VkImageAspectFlags aspectFlags)
+	VkImageView NarwhalImage::createImageView(VkFormat format)
 	{
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -153,8 +189,8 @@ namespace narwhal {
 		return imageView;
 	}
 	
-	void NarwhalImage::createTextureImageView(VkFormat format)	{
-		this->imageView = createImageView(format, VK_FORMAT_R8G8B8A8_SRGB);
+	void NarwhalImage::createTextureImageView()	{
+		this->imageView = createImageView(VK_FORMAT_R8G8B8A8_SRGB);
 		
 		
 	}
