@@ -39,6 +39,13 @@ namespace narwhal {
 			const std::string& vertFilepath,
 			const std::string& fragFilepath, 
 			const PipelineConfigInfo& configInfo);
+		
+		NarwhalPipeline(
+			NarwhalDevice& device,
+			const std::string& vertFilepath,
+			const std::string& fragFilepath,
+			const std::string& compFilepath,
+			const PipelineConfigInfo& configInfo);
 
 		~NarwhalPipeline();
 
@@ -57,6 +64,8 @@ namespace narwhal {
 		VkGraphicsPipelineCreateInfo makePipelineCreateInfo(int stageCount, VkPipelineShaderStageCreateInfo shaderStages[], VkPipelineVertexInputStateCreateInfo& vertexInputInfo, const PipelineConfigInfo& configInfo);
 		
 		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
+
+		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const std::string& compFilepath, const PipelineConfigInfo& configInfo);
 		
 		void createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule);
 		
@@ -65,6 +74,7 @@ namespace narwhal {
 		VkPipeline graphicsPipeline;
 		VkShaderModule vertShaderModule;
 		VkShaderModule fragShaderModule;
+		VkShaderModule compShaderModule;
 	};
 }
 
