@@ -37,6 +37,10 @@
       <UniqueIdentifier>{e8ffcd6d-9088-4f66-8831-0dbbd5fe6a65}</UniqueIdentifier>
       <Extensions>cpp;hpp;h</Extensions>
     </Filter>
+    <Filter Include="shaders\compute">
+      <UniqueIdentifier>{c3f6c26b-d019-4b03-b609-15ef24f9e394}</UniqueIdentifier>
+	  <Extensions>comp</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\main.cpp">
@@ -201,71 +205,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+    <CustomBuild Include="..\..\data\shaders\*.frag">
       <Filter>shaders\fragment</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+    <CustomBuild Include="..\..\data\shaders\*.vert">
       <Filter>shaders\vertex</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
-      <Filter>shaders\vertex</Filter>
+	<CustomBuild Include="..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
     </CustomBuild>
   </ItemGroup>
 </Project>

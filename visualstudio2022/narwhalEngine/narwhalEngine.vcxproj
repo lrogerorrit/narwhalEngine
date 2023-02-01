@@ -218,7 +218,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\utils\utils.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert">
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>
