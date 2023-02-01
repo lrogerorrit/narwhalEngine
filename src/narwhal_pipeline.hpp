@@ -42,6 +42,7 @@ namespace narwhal {
 
 		~NarwhalPipeline();
 
+
 		NarwhalPipeline(const NarwhalPipeline&) = delete;
 		NarwhalPipeline& operator=(const NarwhalPipeline&) = delete;
 		NarwhalPipeline() = default;
@@ -51,6 +52,9 @@ namespace narwhal {
 		static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 		
 	private:
+		void addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, std::string entryPoint, VkSpecializationInfo* specializationInfo= nullptr);
+
+		VkGraphicsPipelineCreateInfo makePipelineCreateInfo(int stageCount, VkPipelineShaderStageCreateInfo shaderStages[], VkPipelineVertexInputStateCreateInfo& vertexInputInfo, const PipelineConfigInfo& configInfo);
 		
 		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
 		

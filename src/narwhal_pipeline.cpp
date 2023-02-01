@@ -25,6 +25,43 @@ namespace narwhal {
 				vkDestroyShaderModule(narwhalDevice.device(), fragShaderModule, nullptr);
 				vkDestroyPipeline(narwhalDevice.device(), graphicsPipeline, nullptr);
 			}
+		
+		}
+		void NarwhalPipeline::addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, std::string entryPoint, VkSpecializationInfo* specializationInfo) {
+			shaderStage[pos].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			shaderStage[pos].stage = stage;
+			shaderStage[pos].module = shaderModule;
+			shaderStage[pos].pName = entryPoint.c_str();
+			shaderStage[pos].flags = 0;
+			shaderStage[pos].pNext = nullptr;
+			shaderStage[pos].pSpecializationInfo = specializationInfo;
+				
+		}
+
+		VkGraphicsPipelineCreateInfo NarwhalPipeline::makePipelineCreateInfo(int stageCount, VkPipelineShaderStageCreateInfo shaderStages[], VkPipelineVertexInputStateCreateInfo& vertexInputInfo, const PipelineConfigInfo& configInfo) {
+			VkGraphicsPipelineCreateInfo pipelineInfo{};
+			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+			pipelineInfo.stageCount = 2; //num of programable stages
+			pipelineInfo.pStages = shaderStages;
+			pipelineInfo.pVertexInputState = &vertexInputInfo;
+			pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
+			pipelineInfo.pViewportState = &configInfo.viewportInfo;
+			pipelineInfo.pRasterizationState = &configInfo.rasterizationInfo;
+			pipelineInfo.pMultisampleState = &configInfo.multisampleInfo;
+			pipelineInfo.pColorBlendState = &configInfo.colorBlendInfo;
+			pipelineInfo.pDepthStencilState = &configInfo.depthStencilInfo;
+			pipelineInfo.pDynamicState = &configInfo.dynamicStateInfo;
+
+
+
+			pipelineInfo.layout = configInfo.pipelineLayout;
+			pipelineInfo.renderPass = configInfo.renderPass;
+			pipelineInfo.subpass = configInfo.subpass;
+
+			pipelineInfo.basePipelineIndex = -1;
+			pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+			
+			return pipelineInfo;
 		}
 
 		void NarwhalPipeline::createGraphicsPipeline(const std::string & vertFilepath, const std::string & fragFilepath, const PipelineConfigInfo& configInfo)
@@ -39,6 +76,11 @@ namespace narwhal {
 			createShaderModule(fragCode, &fragShaderModule);
 			
 			VkPipelineShaderStageCreateInfo shaderStages[2];
+
+			addShaderStage(shaderStages, 0, VK_SHADER_STAGE_VERTEX_BIT, vertShaderModule, "main", nullptr);
+			addShaderStage(shaderStages, 1, VK_SHADER_STAGE_FRAGMENT_BIT, fragShaderModule, "main", nullptr);
+			
+			/*
 			shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 			shaderStages[0].module = vertShaderModule;
@@ -54,6 +96,7 @@ namespace narwhal {
 			shaderStages[1].flags = 0;
 			shaderStages[1].pNext = nullptr;
 			shaderStages[1].pSpecializationInfo = nullptr;
+			*/
 			
 
 			auto bindingDescriptions = configInfo.bindingDescriptions; //NarwhalModel::Vertex::getBindingDescriptions();
@@ -67,7 +110,8 @@ namespace narwhal {
 			vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
 			
-			
+			VkGraphicsPipelineCreateInfo pipelineInfo = makePipelineCreateInfo(2, shaderStages, vertexInputInfo, configInfo);
+			/*
 			VkGraphicsPipelineCreateInfo pipelineInfo{};
 			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 			pipelineInfo.stageCount = 2; //num of programable stages
@@ -89,6 +133,7 @@ namespace narwhal {
 
 			pipelineInfo.basePipelineIndex = -1;
 			pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+			*/
 
 			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create graphics pipeline!");
