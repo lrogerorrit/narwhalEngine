@@ -95,7 +95,25 @@ namespace narwhal {
 
 	void ComputeTestSystem::render(FrameInfo& frameInfo)
 	{
-		VkMemoryBarrier
+		// First, we have to wait until previous vertex shader invocations have completed
+		// since we will overwrite the vertex buffer used in previous frame here.
+		//
+		// We only need execution barriers here and no memory barrier since we have a write-after-read hazard.
+		// Write-after-read only requires execution barriers.
+		// We have not touched the memory written by compute earlier, so no memory synchronization is needed.
+		
+		memoryBarrier(frameInfo.commandBuffer, 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+		
+		// Bind the compute pipeline.
+		
+		narwhalPipeline->bind(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE);
+		
+		// Bind descriptor set.
+		//TODO: https://arm-software.github.io/vulkan-sdk/basic_compute.html
+		
+		
+		
+
 	}
 
 

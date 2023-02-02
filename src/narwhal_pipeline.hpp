@@ -37,6 +37,10 @@ namespace narwhal {
 		uint32_t subpass = 0;
 	};
 	
+	static void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
+	static void imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout);
+	static void bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
+	
 	class NarwhalPipeline
 	{
 	public:
@@ -67,15 +71,13 @@ namespace narwhal {
 		NarwhalPipeline& operator=(const NarwhalPipeline&) = delete;
 		NarwhalPipeline() = default;
 
-		void bind(VkCommandBuffer commandBuffer);
+		void bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS);
 		
 		static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
 
 		PipelineType getPipelineType() const { return pipelineType; }
 
-		static void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
-		static void imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout);
-		static void bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
+		
 		
 		
 		

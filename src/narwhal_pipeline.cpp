@@ -235,9 +235,9 @@ namespace narwhal {
 			}
 		}
 	
-		void NarwhalPipeline::bind(VkCommandBuffer commandBuffer)
+		void NarwhalPipeline::bind(VkCommandBuffer commandBuffer, VkPipelineBindPoint bindPoint)
 		{
-			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline); // VK_PIPELINE_BIND_POINT_GRAPHICS is used to declare it as a graphics pipeline
+			vkCmdBindPipeline(commandBuffer, bindPoint, pipeline); // VK_PIPELINE_BIND_POINT_GRAPHICS is used to declare it as a graphics pipeline
 		}
 
 		void NarwhalPipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) 	{
@@ -318,7 +318,7 @@ namespace narwhal {
 			configInfo.bindingDescriptions = NarwhalModel::Vertex::getBindingDescriptions();
 			configInfo.attributeDescriptions = NarwhalModel::Vertex::getAttributeDescriptions();
 		}
-		void NarwhalPipeline::memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
+		void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
 		{
 			VkMemoryBarrier memoryBarrier = {};
 			memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
@@ -326,7 +326,7 @@ namespace narwhal {
 			memoryBarrier.dstAccessMask = dstAccessMask;
 			vkCmdPipelineBarrier(cmd, srcStageMask, dstStageMask, 0, 1, &memoryBarrier, 0, nullptr, 0, nullptr);
 		}
-		void NarwhalPipeline::imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout)
+		void imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout)
 		{
 			VkImageMemoryBarrier barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
 			barrier.srcAccessMask = srcAccessMask;
@@ -341,7 +341,7 @@ namespace narwhal {
 			barrier.subresourceRange.layerCount = 1;
 			vkCmdPipelineBarrier(cmd, srcStageMask, dstStageMask, false, 0, nullptr, 0, nullptr, 1, &barrier);
 		}
-		void NarwhalPipeline::bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
+		void bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
 		{
 			VkBufferMemoryBarrier barrier = { VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER };
 			barrier.srcAccessMask = srcAccessMask;
