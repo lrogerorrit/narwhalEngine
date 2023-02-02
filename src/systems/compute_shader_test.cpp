@@ -1,4 +1,4 @@
-#include "simple_render_system.hpp"
+#include "compute_shader_test.hpp"
 
 //libs
 #define GLM_FORCE_RADIANS
@@ -13,33 +13,34 @@
 
 namespace narwhal {
 
-	struct SimplePushConstantData {
+	struct ComputeTestPushConstantData {
 		glm::mat4 modelMatrix{ 1.f }; //Identity matrix 
 		//alignas(16) glm::vec3 color; //See: https://registry.khronos.org/vulkan/specs/1.2/html/chap15.html#interfaces-resources-layout
 										// https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 		glm::mat4 normalMatrix{ 1.f };
 	};
 
-	SimpleRenderSystem::SimpleRenderSystem(NarwhalDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout ): narwhalDevice{device}
+	ComputeTestSystem::ComputeTestSystem(NarwhalDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout ): narwhalDevice{device}
 	{
 		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 
-	SimpleRenderSystem::~SimpleRenderSystem()
+	ComputeTestSystem::~ComputeTestSystem()
 	{
 		vkDestroyPipelineLayout(narwhalDevice.device(), pipelineLayout, nullptr);
 	}
 
-	void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
+	void ComputeTestSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 		//Same as  VkPushConstantRange pushConstantRange {VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData)};
 		VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(SimplePushConstantData);
+		pushConstantRange.size = sizeof(ComputeTestPushConstantData);
 
 		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+		
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -48,12 +49,14 @@ namespace narwhal {
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
+		
+
 		if (vkCreatePipelineLayout(narwhalDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create pipeline layout!");
 		}
 	}
-	void SimpleRenderSystem::createPipeline(VkRenderPass renderPass)
+	void ComputeTestSystem::createPipeline(VkRenderPass renderPass)
 	{
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
 
@@ -62,25 +65,25 @@ namespace narwhal {
 
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
-		narwhalPipeline = std::make_unique<NarwhalPipeline>(narwhalDevice, "data/shaders/simple_shader.vert.spv", "data/shaders/simple_shader.frag.spv", pipelineConfig);
+		narwhalPipeline = std::make_unique<NarwhalPipeline>(narwhalDevice, "data/shaders/simple_shader.vert.spv", "data/shaders/simple_shader.frag.spv","data/shaders/test_shader.comp", pipelineConfig);
 
 	}
 
 
-	void SimpleRenderSystem::renderGameObjects(FrameInfo& frameInfo){
+	void ComputeTestSystem::renderGameObjects(FrameInfo& frameInfo){
 		narwhalPipeline->bind(frameInfo.commandBuffer);
 
 
-		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 2, &frameInfo.globalDescriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 		for (auto& kv : frameInfo.gameObjects) {
 			auto& obj = kv.second;
 			if (obj.model == nullptr) continue;
 
-			SimplePushConstantData push{};
+			ComputeTestPushConstantData push{};
 			push.modelMatrix = obj.transform.mat4();
 			push.normalMatrix = obj.transform.normalMatrix();
 
-			vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
+			vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ComputeTestPushConstantData), &push);
 			obj.model->bind(frameInfo.commandBuffer);
 			obj.model->draw(frameInfo.commandBuffer);
 		}

@@ -2,10 +2,11 @@
 
 #include "keyboard_movement_controller.hpp"
 #include "narwhal_camera.hpp"
+#include "narwhal_buffer.hpp"
 #include "systems/simple_render_system.hpp"
 #include "systems/point_light_system.hpp"
 #include "systems/narwhal_imgui.hpp"
-#include "narwhal_buffer.hpp"
+#include "systems/compute_shader_test.hpp"
 
 
 //libs
@@ -35,7 +36,8 @@ namespace narwhal {
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			
 			.build();
 		loadGameObjects();
 	}
@@ -52,14 +54,19 @@ namespace narwhal {
 			narwhalRenderer.getImageCount() };
 		
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<NarwhalBuffer>> storageBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		
+		const int MAX_OBJECTS = 10000;
 		for (int i = 0; i < uboBuffers.size(); i++) {
 			uboBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+			storageBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(ComputeTestData)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); //Needs to be coherent since if we want to write from the gpu, then we need to 
 			uboBuffers[i]->map();
+			storageBuffers[i]->map();
 		}
 		
 		auto globalSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -67,13 +74,17 @@ namespace narwhal {
 
 
 			
-			auto bufferInfo = uboBuffers[i]->descriptorInfo();
+			auto uboBufferInfo = uboBuffers[i]->descriptorInfo();
+			auto storageBufferInfo = storageBuffers[i]->descriptorInfo();
+			
 			NarwhalDescriptorWriter(*globalSetLayout, *globalPool)
-				.writeBuffer(0, &bufferInfo)
+				.writeBuffer(0, &uboBufferInfo)
+				.writeBuffer(1, &storageBufferInfo)
 				.build(globalDescriptorSets[i]);
 		}
+		ComputeTestSystem computeTestSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 
-		SimpleRenderSystem simpleRenderSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(),globalSetLayout->getDescriptorSetLayout()};
+		//SimpleRenderSystem simpleRenderSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(),globalSetLayout->getDescriptorSetLayout()};
 		PointLightSystem pointLightSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(),globalSetLayout->getDescriptorSetLayout() };
 		NarwhalCamera camera{};
 
@@ -120,7 +131,8 @@ namespace narwhal {
 
 				// Render
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderGameObjects(frameInfo);
+				//simpleRenderSystem.renderGameObjects(frameInfo);
+				computeTestSystem.renderGameObjects(frameInfo);
 				pointLightSystem.render(frameInfo);
 				
 

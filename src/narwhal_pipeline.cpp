@@ -50,7 +50,7 @@ namespace narwhal {
 		VkGraphicsPipelineCreateInfo NarwhalPipeline::makePipelineCreateInfo(int stageCount, VkPipelineShaderStageCreateInfo shaderStages[], VkPipelineVertexInputStateCreateInfo& vertexInputInfo, const PipelineConfigInfo& configInfo) {
 			VkGraphicsPipelineCreateInfo pipelineInfo{};
 			pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			pipelineInfo.stageCount = 2; //num of programable stages
+			pipelineInfo.stageCount =stageCount; //num of programable stages
 			pipelineInfo.pStages = shaderStages;
 			pipelineInfo.pVertexInputState = &vertexInputInfo;
 			pipelineInfo.pInputAssemblyState = &configInfo.inputAssemblyInfo;
@@ -121,7 +121,7 @@ namespace narwhal {
 			
 			VkGraphicsPipelineCreateInfo pipelineInfo = makePipelineCreateInfo(2, shaderStages, vertexInputInfo, configInfo);
 			
-
+			
 			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create graphics pipeline!");
 			}
@@ -163,7 +163,7 @@ namespace narwhal {
 
 			VkGraphicsPipelineCreateInfo pipelineInfo = makePipelineCreateInfo(3, shaderStages, vertexInputInfo, configInfo);
 
-
+			
 			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create graphics pipeline!");
 			}

@@ -1,1 +1,10 @@
 #version 460
+layout(std140,set = 1, binding = 0) readonly buffer CompStorageTest{
+	vec3 pixelData;
+} compStorageTest;
+
+
+void main(){
+
+
+}

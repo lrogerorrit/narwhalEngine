@@ -34,4 +34,8 @@ namespace narwhal {
 		VkDescriptorSet globalDescriptorSet;
 		NarwhalGameObject::Map& gameObjects;
 	};
+
+	struct ComputeTestData {
+		glm::vec3 pixelData;
+	};
 }
