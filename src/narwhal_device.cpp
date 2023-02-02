@@ -274,7 +274,11 @@ namespace narwhal {
 		glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
 		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-
+		
+		if (enablePrintExtension) {
+			extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+		}
+		
 		if (enableValidationLayers) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 		}

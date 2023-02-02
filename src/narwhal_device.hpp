@@ -24,8 +24,9 @@ struct QueueFamilyIndices {
 
 class NarwhalDevice {
  public:
+     const bool enablePrintExtension = true;
 #ifdef NDEBUG
-  const bool enableValidationLayers = false;
+     const bool enableValidationLayers = true; //false;
 #else
   const bool enableValidationLayers = true;
 #endif
