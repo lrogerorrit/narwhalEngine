@@ -46,4 +46,5 @@ namespace narwhal {
 		file.close();
 		return buffer;
 	}
+
 }

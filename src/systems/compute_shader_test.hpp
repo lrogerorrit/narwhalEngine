@@ -27,6 +27,7 @@ namespace narwhal {
 		
 
 		void renderGameObjects(FrameInfo& frameInfo);
+		void render(FrameInfo& frameInfo);
 	private:
 		
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);

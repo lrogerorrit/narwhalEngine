@@ -8,6 +8,12 @@
 
 namespace narwhal {
 
+	enum class PipelineType {
+		GRAPHICS,
+		COMPUTE,
+		UNKNOWN
+	};
+
 	struct PipelineConfigInfo {
 		PipelineConfigInfo(const PipelineConfigInfo&) = delete;
 		PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
@@ -47,7 +53,14 @@ namespace narwhal {
 			const std::string& compFilepath,
 			const PipelineConfigInfo& configInfo);
 
+		NarwhalPipeline(
+			NarwhalDevice& device,
+			const std::string& compFilepath,
+			const PipelineConfigInfo& configInfo);
+
 		~NarwhalPipeline();
+
+		void createPipelineCache();
 
 
 		NarwhalPipeline(const NarwhalPipeline&) = delete;
@@ -57,11 +70,19 @@ namespace narwhal {
 		void bind(VkCommandBuffer commandBuffer);
 		
 		static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
+
+		PipelineType getPipelineType() const { return pipelineType; }
+
+		static void memoryBarrier(VkMemoryBarrier* memoryBarrier, VkCommandBuffer commandBuffer, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkDependencyFlags dependencyFlags);
+		
+		
 		
 	private:
 		void addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, std::string entryPoint, VkSpecializationInfo* specializationInfo= nullptr);
 
 		VkGraphicsPipelineCreateInfo makePipelineCreateInfo(int stageCount, VkPipelineShaderStageCreateInfo shaderStages[], VkPipelineVertexInputStateCreateInfo& vertexInputInfo, const PipelineConfigInfo& configInfo);
+
+		void createComputePipeline(const std::string& compFilepath, const PipelineConfigInfo& configInfo);
 		
 		void createGraphicsPipeline(const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
 
@@ -71,10 +92,13 @@ namespace narwhal {
 		
 		NarwhalDevice& narwhalDevice;
 		
-		VkPipeline graphicsPipeline;
+		VkPipeline pipeline;
 		VkShaderModule vertShaderModule;
 		VkShaderModule fragShaderModule;
 		VkShaderModule compShaderModule;
+		VkPipelineCache pipelineCache;
+		
+		PipelineType pipelineType = PipelineType::UNKNOWN;
 	};
 }
 

@@ -267,7 +267,21 @@ namespace narwhal {
 
 		return true;
 	}
+	bool NarwhalDevice::isExtensionSupported(const char* extensionName) {
+		uint32_t extensionCount = 0;
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+		std::vector<VkExtensionProperties> extensions(extensionCount);
+		vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
+		for (const auto& extension : extensions) {
+			if (strcmp(extension.extensionName, extensionName) == 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
 	std::vector<const char*> NarwhalDevice::getRequiredExtensions() {
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions;
@@ -275,12 +289,15 @@ namespace narwhal {
 
 		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 		
-		if (enablePrintExtension) {
-			extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
-		}
 		
 		if (enableValidationLayers) {
 			extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+			
+			/*if (enablePrintExtension && isExtensionSupported(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME)) {
+				extensions.push_back(VK_KHR_SHADER_NON_SEMANTIC_INFO_EXTENSION_NAME);
+				shaderPrintEnabled = true;
+			}*/
+			
 		}
 
 		return extensions;

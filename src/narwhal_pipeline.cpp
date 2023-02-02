@@ -16,6 +16,7 @@ namespace narwhal {
 			const std::string& fragFilepath,
 			const PipelineConfigInfo& configInfo) : narwhalDevice(device)
 		{
+			createPipelineCache();
 			createGraphicsPipeline(vertFilepath, fragFilepath,configInfo);
 		}
 
@@ -25,17 +26,37 @@ namespace narwhal {
 			const std::string& compFilepath,
 			const PipelineConfigInfo& configInfo) : narwhalDevice(device)
 		{
+			createPipelineCache();
 			createGraphicsPipeline(vertFilepath, fragFilepath, compFilepath, configInfo);
+		}
+
+		NarwhalPipeline::NarwhalPipeline(NarwhalDevice& device,
+			const std::string& compFilepath,
+			const PipelineConfigInfo& configInfo) : narwhalDevice(device)
+		{
+			createPipelineCache();
+			createComputePipeline(compFilepath, configInfo);
 		}
 		
 		NarwhalPipeline::~NarwhalPipeline() {
 			{
+				
 				vkDestroyShaderModule(narwhalDevice.device(), vertShaderModule, nullptr);
 				vkDestroyShaderModule(narwhalDevice.device(), fragShaderModule, nullptr);
-				vkDestroyPipeline(narwhalDevice.device(), graphicsPipeline, nullptr);
+				vkDestroyShaderModule(narwhalDevice.device(), compShaderModule, nullptr);
+				vkDestroyPipeline(narwhalDevice.device(), pipeline, nullptr);
 			}
 		
 		}
+
+		void NarwhalPipeline::createPipelineCache() {
+			VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
+			pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
+			VK_CHECK(vkCreatePipelineCache(narwhalDevice.device(), &pipelineCacheCreateInfo, nullptr, &pipelineCache));
+		}
+		
+		
+
 		void NarwhalPipeline::addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, std::string entryPoint, VkSpecializationInfo* specializationInfo) {
 			shaderStage[pos].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			shaderStage[pos].stage = stage;
@@ -73,10 +94,35 @@ namespace narwhal {
 			return pipelineInfo;
 		}
 
+		void NarwhalPipeline::createComputePipeline(const std::string& compFilepath, const PipelineConfigInfo& configInfo) {
+			
+			pipelineType = PipelineType::COMPUTE;
+			
+			auto compCode = readFilePipeline(compFilepath);
+			
+			createShaderModule(compCode, &compShaderModule);
+			
+			VkComputePipelineCreateInfo info = { VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO };
+			info.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+			info.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+			info.stage.module = compShaderModule;
+			info.stage.pName = "main";
+			info.layout = configInfo.pipelineLayout;
+
+			vkCreateComputePipelines(narwhalDevice.device(), pipelineCache, 1, &info, nullptr, &pipeline);
+
+			
+			
+
+			
+		}
+
 		void NarwhalPipeline::createGraphicsPipeline(const std::string & vertFilepath, const std::string & fragFilepath, const PipelineConfigInfo& configInfo)
 		{
 			assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 			assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
+
+			pipelineType = PipelineType::GRAPHICS;
 			
 			auto vertCode = readFilePipeline(vertFilepath);
 			auto fragCode = readFilePipeline(fragFilepath);
@@ -122,7 +168,7 @@ namespace narwhal {
 			VkGraphicsPipelineCreateInfo pipelineInfo = makePipelineCreateInfo(2, shaderStages, vertexInputInfo, configInfo);
 			
 			
-			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create graphics pipeline!");
 			}
 			
@@ -135,6 +181,8 @@ namespace narwhal {
 		{
 			assert(configInfo.pipelineLayout != VK_NULL_HANDLE && "Cannot create graphics pipeline: no pipelineLayout provided in configInfo");
 			assert(configInfo.renderPass != VK_NULL_HANDLE && "Cannot create graphics pipeline: no renderPass provided in configInfo");
+
+			pipelineType = PipelineType::GRAPHICS;
 
 			auto vertCode = readFilePipeline(vertFilepath);
 			auto fragCode = readFilePipeline(fragFilepath);
@@ -164,7 +212,7 @@ namespace narwhal {
 			VkGraphicsPipelineCreateInfo pipelineInfo = makePipelineCreateInfo(3, shaderStages, vertexInputInfo, configInfo);
 
 			
-			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+			if (vkCreateGraphicsPipelines(narwhalDevice.device(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS) {
 				throw std::runtime_error("Failed to create graphics pipeline!");
 			}
 
@@ -189,7 +237,7 @@ namespace narwhal {
 	
 		void NarwhalPipeline::bind(VkCommandBuffer commandBuffer)
 		{
-			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline); // VK_PIPELINE_BIND_POINT_GRAPHICS is used to declare it as a graphics pipeline
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline); // VK_PIPELINE_BIND_POINT_GRAPHICS is used to declare it as a graphics pipeline
 		}
 
 		void NarwhalPipeline::defaultPipelineConfigInfo(PipelineConfigInfo& configInfo) 	{
@@ -269,5 +317,40 @@ namespace narwhal {
 
 			configInfo.bindingDescriptions = NarwhalModel::Vertex::getBindingDescriptions();
 			configInfo.attributeDescriptions = NarwhalModel::Vertex::getAttributeDescriptions();
+		}
+		void NarwhalPipeline::memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
+		{
+			VkMemoryBarrier memoryBarrier = {};
+			memoryBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER;
+			memoryBarrier.srcAccessMask = srcAccessMask;
+			memoryBarrier.dstAccessMask = dstAccessMask;
+			vkCmdPipelineBarrier(cmd, srcStageMask, dstStageMask, 0, 1, &memoryBarrier, 0, nullptr, 0, nullptr);
+		}
+		void NarwhalPipeline::imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout)
+		{
+			VkImageMemoryBarrier barrier = { VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER };
+			barrier.srcAccessMask = srcAccessMask;
+			barrier.dstAccessMask = dstAccessMask;
+			barrier.oldLayout = oldLayout;
+			barrier.newLayout = newLayout;
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.image = image;
+			barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			barrier.subresourceRange.levelCount = 1;
+			barrier.subresourceRange.layerCount = 1;
+			vkCmdPipelineBarrier(cmd, srcStageMask, dstStageMask, false, 0, nullptr, 0, nullptr, 1, &barrier);
+		}
+		void NarwhalPipeline::bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask)
+		{
+			VkBufferMemoryBarrier barrier = { VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER };
+			barrier.srcAccessMask = srcAccessMask;
+			barrier.dstAccessMask = dstAccessMask;
+			barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+			barrier.buffer = buffer;
+			barrier.offset = 0;
+			barrier.size = VK_WHOLE_SIZE;
+			vkCmdPipelineBarrier(cmd, srcStageMask, dstStageMask, false, 0, nullptr, 1, &barrier, 0, nullptr);
 		}
 }

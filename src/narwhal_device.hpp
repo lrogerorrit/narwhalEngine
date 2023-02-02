@@ -26,7 +26,7 @@ class NarwhalDevice {
  public:
      const bool enablePrintExtension = true;
 #ifdef NDEBUG
-     const bool enableValidationLayers = true; //false;
+     const bool enableValidationLayers = false;
 #else
   const bool enableValidationLayers = true;
 #endif
@@ -92,6 +92,7 @@ class NarwhalDevice {
   bool isDeviceSuitable(VkPhysicalDevice device);
   std::vector<const char *> getRequiredExtensions();
   bool checkValidationLayerSupport();
+  bool isExtensionSupported(const char* extensionName);
   QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
   void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
   void hasGflwRequiredInstanceExtensions();
@@ -108,6 +109,8 @@ class NarwhalDevice {
   VkSurfaceKHR surface_;
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
+
+  bool shaderPrintEnabled = false;
 
   const std::vector<const char *> validationLayers = {"VK_LAYER_KHRONOS_validation"};
   const std::vector<const char *> deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};

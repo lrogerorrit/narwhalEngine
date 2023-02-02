@@ -13,12 +13,6 @@
 
 namespace narwhal {
 
-	struct ComputeTestPushConstantData {
-		glm::mat4 modelMatrix{ 1.f }; //Identity matrix 
-		//alignas(16) glm::vec3 color; //See: https://registry.khronos.org/vulkan/specs/1.2/html/chap15.html#interfaces-resources-layout
-										// https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
-		glm::mat4 normalMatrix{ 1.f };
-	};
 
 	ComputeTestSystem::ComputeTestSystem(NarwhalDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout ): narwhalDevice{device}
 	{
@@ -34,7 +28,7 @@ namespace narwhal {
 	void ComputeTestSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
 		//Same as  VkPushConstantRange pushConstantRange {VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData)};
-		VkPushConstantRange pushConstantRange{};
+		/*VkPushConstantRange pushConstantRange{};
 		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 		pushConstantRange.offset = 0;
 		pushConstantRange.size = sizeof(ComputeTestPushConstantData);
@@ -47,7 +41,17 @@ namespace narwhal {
 		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
 		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount = 1;
-		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;*/
+		
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+		
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = 0;
+
+		
 
 		
 
@@ -74,7 +78,7 @@ namespace narwhal {
 		narwhalPipeline->bind(frameInfo.commandBuffer);
 
 
-		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
+		/*vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &frameInfo.globalDescriptorSet, 0, nullptr);
 		for (auto& kv : frameInfo.gameObjects) {
 			auto& obj = kv.second;
 			if (obj.model == nullptr) continue;
@@ -86,7 +90,12 @@ namespace narwhal {
 			vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(ComputeTestPushConstantData), &push);
 			obj.model->bind(frameInfo.commandBuffer);
 			obj.model->draw(frameInfo.commandBuffer);
-		}
+		}*/
+	}
+
+	void ComputeTestSystem::render(FrameInfo& frameInfo)
+	{
+		VkMemoryBarrier
 	}
 
 
