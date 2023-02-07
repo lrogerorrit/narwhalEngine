@@ -69,7 +69,7 @@ namespace narwhal {
 
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
-		narwhalPipeline = std::make_unique<NarwhalPipeline>(narwhalDevice, "data/shaders/simple_shader.vert.spv", "data/shaders/simple_shader.frag.spv","data/shaders/test_shader.comp", pipelineConfig);
+		narwhalPipeline = std::make_unique<NarwhalPipeline>(narwhalDevice, "data/shaders/test_shader.comp.spv", pipelineConfig);
 
 	}
 

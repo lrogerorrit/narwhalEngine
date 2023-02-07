@@ -37,9 +37,9 @@ namespace narwhal {
 		uint32_t subpass = 0;
 	};
 	
-	static void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
-	static void imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout);
-	static void bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
+	void memoryBarrier(VkCommandBuffer cmd, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
+	void imageMemoryBarrier(VkCommandBuffer cmd, VkImage image, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, VkImageLayout oldLayout, VkImageLayout newLayout);
+	void bufferMemoryBarrier(VkCommandBuffer cmd, VkBuffer buffer, VkAccessFlags srcAccessMask, VkAccessFlags dstAccessMask, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask);
 	
 	class NarwhalPipeline
 	{
@@ -82,7 +82,7 @@ namespace narwhal {
 		
 		
 	private:
-		void addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, std::string entryPoint, VkSpecializationInfo* specializationInfo= nullptr);
+		void addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, const char* entryPoint, VkSpecializationInfo* specializationInfo= nullptr);
 
 		VkGraphicsPipelineCreateInfo makePipelineCreateInfo(int stageCount, VkPipelineShaderStageCreateInfo shaderStages[], VkPipelineVertexInputStateCreateInfo& vertexInputInfo, const PipelineConfigInfo& configInfo);
 

@@ -160,7 +160,7 @@ namespace narwhal {
 				// Render
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
 				//simpleRenderSystem.renderGameObjects(frameInfo);
-				computeTestSystem.renderGameObjects(frameInfo);
+				computeTestSystem.render(frameInfo);
 				pointLightSystem.render(frameInfo);
 				
 

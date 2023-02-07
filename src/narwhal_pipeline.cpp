@@ -57,11 +57,11 @@ namespace narwhal {
 		
 		
 
-		void NarwhalPipeline::addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, std::string entryPoint, VkSpecializationInfo* specializationInfo) {
+		void NarwhalPipeline::addShaderStage(VkPipelineShaderStageCreateInfo shaderStage[], int pos, VkShaderStageFlagBits stage, VkShaderModule shaderModule, const char* entryPoint, VkSpecializationInfo* specializationInfo) {
 			shaderStage[pos].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			shaderStage[pos].stage = stage;
 			shaderStage[pos].module = shaderModule;
-			shaderStage[pos].pName = entryPoint.c_str();
+			shaderStage[pos].pName = entryPoint;
 			shaderStage[pos].flags = 0;
 			shaderStage[pos].pNext = nullptr;
 			shaderStage[pos].pSpecializationInfo = specializationInfo;
@@ -109,7 +109,9 @@ namespace narwhal {
 			info.stage.pName = "main";
 			info.layout = configInfo.pipelineLayout;
 
-			vkCreateComputePipelines(narwhalDevice.device(), pipelineCache, 1, &info, nullptr, &pipeline);
+			if (vkCreateComputePipelines(narwhalDevice.device(), pipelineCache, 1, &info, nullptr, &pipeline) != VK_SUCCESS) {
+				throw std::runtime_error("Failed to create compute pipeline!");
+			}
 
 			
 			
