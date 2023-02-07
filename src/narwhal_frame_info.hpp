@@ -32,6 +32,7 @@ namespace narwhal {
 		VkCommandBuffer commandBuffer;
 		NarwhalCamera camera;
 		VkDescriptorSet globalDescriptorSet;
+		VkDescriptorSet computeDescriptorSet;
 		NarwhalGameObject::Map& gameObjects;
 	};
 

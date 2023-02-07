@@ -146,7 +146,7 @@ namespace narwhal {
 
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
-				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],gameObjects};
+				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],gameObjects};
 
 				//Update
 				GlobalUbo ubo{};

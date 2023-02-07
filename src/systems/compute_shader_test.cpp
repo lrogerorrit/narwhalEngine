@@ -93,6 +93,7 @@ namespace narwhal {
 		}*/
 	}
 
+		//TODO: https://arm-software.github.io/vulkan-sdk/basic_compute.html
 	void ComputeTestSystem::render(FrameInfo& frameInfo)
 	{
 		// First, we have to wait until previous vertex shader invocations have completed
@@ -105,11 +106,22 @@ namespace narwhal {
 		memoryBarrier(frameInfo.commandBuffer, 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 		
 		// Bind the compute pipeline.
-		
 		narwhalPipeline->bind(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE);
 		
 		// Bind descriptor set.
-		//TODO: https://arm-software.github.io/vulkan-sdk/basic_compute.html
+		vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &frameInfo.computeDescriptorSet, 0, nullptr);
+		
+		// Dispatch the compute job.
+		// The number of workgroups is determined by the number of vertices in the vertex buffer.
+		// We have 3 vertices in the vertex buffer, so we dispatch 3 workgroups.
+		// Each workgroup will execute the compute shader once.
+		vkCmdDispatch(frameInfo.commandBuffer, 1, 1, 1);
+		
+		// We have to wait until compute shader has finished writing to the vertex buffer.
+		// We need a memory barrier here to ensure that the vertex shader reads from the vertex buffer after the compute shader has finished writing to the vertex buffer.
+		// We have a write-after-write hazard here, so we need a memory barrier.
+		// We have not touched the memory read by the vertex shader earlier, so no execution synchronization is needed.
+		memoryBarrier(frameInfo.commandBuffer, 0, 0, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
 		
 		
 		
