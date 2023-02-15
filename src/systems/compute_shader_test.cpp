@@ -103,7 +103,7 @@ namespace narwhal {
 		// Write-after-read only requires execution barriers.
 		// We have not touched the memory written by compute earlier, so no memory synchronization is needed.
 		
-		memoryBarrier(frameInfo.commandBuffer, 0, 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+		memoryBarrier(frameInfo.commandBuffer,VK_ACCESS_SHADER_WRITE_BIT , VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 		
 		// Bind the compute pipeline.
 		narwhalPipeline->bind(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE);
@@ -121,7 +121,7 @@ namespace narwhal {
 		// We need a memory barrier here to ensure that the vertex shader reads from the vertex buffer after the compute shader has finished writing to the vertex buffer.
 		// We have a write-after-write hazard here, so we need a memory barrier.
 		// We have not touched the memory read by the vertex shader earlier, so no execution synchronization is needed.
-		memoryBarrier(frameInfo.commandBuffer, 0, 0, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
+		//memoryBarrier(frameInfo.commandBuffer, 0, 0, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
 		
 		
 		

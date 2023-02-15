@@ -157,9 +157,9 @@ namespace narwhal {
 				uboBuffers[frameIndex]->flush();
 
 				// Render
+				computeTestSystem.render(frameInfo);
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
 				//simpleRenderSystem.renderGameObjects(frameInfo);
-				computeTestSystem.render(frameInfo);
 				pointLightSystem.render(frameInfo);
 				
 
