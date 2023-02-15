@@ -35,13 +35,16 @@ namespace narwhal {
 
 	FirstApp::FirstApp() {
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
-			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
+			
+			
+
 			
 			.build();
+		
+			
 		loadGameObjects();
 	}
 
@@ -58,29 +61,26 @@ namespace narwhal {
 		
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		std::vector<std::unique_ptr<NarwhalBuffer>> storageBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
-		std::vector<std::unique_ptr<NarwhalBuffer>> storageBuffers2_pos(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
-		std::vector<std::unique_ptr<NarwhalBuffer>> storageBuffers2_speed(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		
 		
 		const int MAX_OBJECTS = 10000;
 		for (int i = 0; i < uboBuffers.size(); i++) {
 			uboBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(GlobalUbo), 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
-			storageBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(ComputeTestData)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); //Needs to be coherent since if we want to write from the gpu, then we need to 
-			storageBuffers2_pos[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(glm::vec2)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); //Needs to be coherent since if we want to write from the gpu, then we need to 
-			storageBuffers2_speed[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(glm::vec2)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); //Needs to be coherent since if we want to write from the gpu, then we need to 
+			
 			uboBuffers[i]->map();
+		}
+		for (int i = 0; i < storageBuffers.size(); i++) {
+			storageBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(ComputeTestData)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); //Needs to be coherent since if we want to write from the gpu, then we need to 
 			storageBuffers[i]->map();
-			storageBuffers2_pos[i]->map();
-			storageBuffers2_speed[i]->map();
+			
 		}
 		
 		auto globalSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
 			.build();
 
 		auto computeSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT)
 			.build();
 			
 		//TODO: write to computesetLayout
@@ -92,21 +92,20 @@ namespace narwhal {
 
 			
 			auto uboBufferInfo = uboBuffers[i]->descriptorInfo();
-			auto storageBufferInfo = storageBuffers[i]->descriptorInfo();
 			
 			NarwhalDescriptorWriter(*globalSetLayout, *globalPool)
 				.writeBuffer(0, &uboBufferInfo)
-				.writeBuffer(1, &storageBufferInfo)
+				
 				.build(globalDescriptorSets[i]);
 		}
 
 		for (int i = 0; i < computeDescriptorSets.size(); i++) {
-			auto storageBufferInfo_pos = storageBuffers2_pos[i]->descriptorInfo();
-			auto storageBufferInfo_speed = storageBuffers2_speed[i]->descriptorInfo();
+			
+			auto storageBufferInfo = storageBuffers[i]->descriptorInfo();
+			
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
-				.writeBuffer(0, &storageBufferInfo_pos)
-				.writeBuffer(1, &storageBufferInfo_speed)
+				.writeBuffer(0, &storageBufferInfo)
 				.build(computeDescriptorSets[i]);
 		}
 
