@@ -156,10 +156,12 @@ namespace narwhal {
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
-				// Render
+				// Compute Shader
 				computeTestSystem.render(frameInfo);
+							
+				//Render
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
-				//simpleRenderSystem.renderGameObjects(frameInfo);
+				
 				pointLightSystem.render(frameInfo);
 				
 

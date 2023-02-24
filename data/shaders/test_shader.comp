@@ -1,13 +1,16 @@
 #version 460
 //#extension GL_EXT_debug_printf : enable
 
+struct TestData{
+	vec3 pixelData;
+};
 
-layout(std140,set = 1, binding = 0) readonly buffer CompStorageTest{
-	vec3 pixelData[];
+layout(std140,set = 0, binding = 0) buffer CompStorageTest{
+	TestData data[];
 } compStorageTest;
 
 
 void main(){
-
+	compStorageTest.data[gl_GlobalInvocationID.x].pixelData = vec3(1.0,0.0,0.0);
 
 }
