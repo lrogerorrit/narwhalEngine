@@ -37,6 +37,8 @@ namespace narwhal {
 		// note: order of declarations matters
 		std::unique_ptr<NarwhalDescriptorPool> globalPool{};
 		NarwhalGameObject::Map gameObjects;
+		VkFence fence;
+		
 	
 	};
 

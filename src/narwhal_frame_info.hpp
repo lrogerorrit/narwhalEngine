@@ -34,6 +34,8 @@ namespace narwhal {
 		VkDescriptorSet globalDescriptorSet;
 		VkDescriptorSet computeDescriptorSet;
 		NarwhalGameObject::Map& gameObjects;
+		VkFence computeFence;
+		
 	};
 
 	struct ComputeTestData {

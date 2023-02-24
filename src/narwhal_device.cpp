@@ -482,7 +482,7 @@ namespace narwhal {
 		return commandBuffer;
 	}
 
-	void NarwhalDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+	void NarwhalDevice::endSingleTimeCommands(VkCommandBuffer commandBuffer,VkFence fence) {
 		vkEndCommandBuffer(commandBuffer);
 
 		VkSubmitInfo submitInfo{};
@@ -490,7 +490,7 @@ namespace narwhal {
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &commandBuffer;
 
-		vkQueueSubmit(graphicsQueue_, 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueSubmit(graphicsQueue_, 1, &submitInfo, fence);
 		vkQueueWaitIdle(graphicsQueue_);
 
 		vkFreeCommandBuffers(device_, commandPool, 1, &commandBuffer);

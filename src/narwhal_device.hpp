@@ -64,7 +64,7 @@ class NarwhalDevice {
       VkBuffer &buffer,
       VkDeviceMemory &bufferMemory);
   VkCommandBuffer beginSingleTimeCommands();
-  void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+  void endSingleTimeCommands(VkCommandBuffer commandBuffer, VkFence fence = VK_NULL_HANDLE);
   void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
   void copyBufferToImage(
       VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
@@ -108,6 +108,7 @@ class NarwhalDevice {
   VkDevice device_;
   VkSurfaceKHR surface_;
   VkQueue graphicsQueue_;
+  
   VkQueue presentQueue_;
 
   bool shaderPrintEnabled = false;

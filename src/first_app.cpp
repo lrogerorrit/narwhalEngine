@@ -38,10 +38,6 @@ namespace narwhal {
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
-			
-			
-
-			
 			.build();
 		
 			
@@ -58,9 +54,17 @@ namespace narwhal {
 			narwhalWindow,
 			narwhalRenderer.getSwapChainRenderPass(),
 			narwhalRenderer.getImageCount() };
+
+
+		// Load fence
+		VkFenceCreateInfo fenceInfo{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+		vkCreateFence(narwhalDevice.device(), &fenceInfo, nullptr, &fence);
 		
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		std::vector<std::unique_ptr<NarwhalBuffer>> storageBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		//make staging NarwhalBuffer
+		std::vector<std::unique_ptr<NarwhalBuffer>> stagingBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		
 		
 		
 		const int MAX_OBJECTS = 10000;
@@ -71,7 +75,10 @@ namespace narwhal {
 		}
 		for (int i = 0; i < storageBuffers.size(); i++) {
 			storageBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(ComputeTestData)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |VK_MEMORY_PROPERTY_HOST_COHERENT_BIT); //Needs to be coherent since if we want to write from the gpu, then we need to 
+			stagingBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(ComputeTestData)*MAX_OBJECTS, 1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT ); 
+			
 			storageBuffers[i]->map();
+			
 			
 		}
 		
@@ -145,7 +152,7 @@ namespace narwhal {
 
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
-				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],gameObjects};
+				FrameInfo frameInfo{ frameIndex, frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],gameObjects,fence};
 
 				//Update
 				GlobalUbo ubo{};
@@ -158,6 +165,28 @@ namespace narwhal {
 
 				// Compute Shader
 				computeTestSystem.render(frameInfo);
+				
+				VkBufferCopy copyRegion = {
+					0, // VkDeviceSize    srcOffset
+					0, // VkDeviceSize    dstOffset
+					sizeof(ComputeTestData)* MAX_OBJECTS // VkDeviceSize    size
+				};
+				
+				vkCmdCopyBuffer(commandBuffer, storageBuffers[frameIndex]->getBuffer(), storageBuffers[frameIndex]->getBuffer(), 1, &copyRegion);
+				
+				void* data;
+				vkMapMemory(narwhalDevice.device(), storageBuffers[frameIndex]->getMemory(), 0, sizeof(ComputeTestData)* MAX_OBJECTS, 0, &data);
+				ComputeTestData* computeData = (ComputeTestData*)data;
+				for (int i = 0; i < 2; i++) {
+					std::cout << "computeData[" << i << "].position = " << computeData[i].pixelData.x << " " << computeData[i].pixelData.y << " " << computeData[i].pixelData.z << std::endl;
+				}
+				vkUnmapMemory(narwhalDevice.device(), storageBuffers[frameIndex]->getMemory());
+				
+				
+				
+				
+					
+				
 							
 				//Render
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);

@@ -40,6 +40,8 @@ namespace narwhal {
         VkMemoryPropertyFlags getMemoryPropertyFlags() const { return memoryPropertyFlags; }
         VkDeviceSize getBufferSize() const { return bufferSize; }
 
+        VkDeviceMemory getMemory() const {return memory;}
+
     private:
         static VkDeviceSize getAlignment(VkDeviceSize instanceSize, VkDeviceSize minOffsetAlignment);
 

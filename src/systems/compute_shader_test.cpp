@@ -92,10 +92,14 @@ namespace narwhal {
 			obj.model->draw(frameInfo.commandBuffer);
 		}*/
 	}
-
+	/*
 		//TODO: https://arm-software.github.io/vulkan-sdk/basic_compute.html
 	void ComputeTestSystem::render(FrameInfo& frameInfo)
 	{
+
+		VkQueue queue;
+		
+
 		// First, we have to wait until previous vertex shader invocations have completed
 		// since we will overwrite the vertex buffer used in previous frame here.
 		//
@@ -104,6 +108,7 @@ namespace narwhal {
 		// We have not touched the memory written by compute earlier, so no memory synchronization is needed.
 		
 		//memoryBarrier(frameInfo.commandBuffer,VK_ACCESS_SHADER_WRITE_BIT , VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+		vkResetFences(narwhalDevice.device(), 1, &frameInfo.computeFence);
 		memoryBarrier(frameInfo.commandBuffer,0 , 0, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
 		
 		// Bind the compute pipeline.
@@ -116,18 +121,32 @@ namespace narwhal {
 		// The number of workgroups is determined by the number of vertices in the vertex buffer.
 		// We have 3 vertices in the vertex buffer, so we dispatch 3 workgroups.
 		// Each workgroup will execute the compute shader once.
-		vkCmdDispatch(frameInfo.commandBuffer, 1, 1, 1);
+
+		//We're now doing it with a queue submit so we can add a fence
+
+		
+		//vkCmdDispatch(frameInfo.commandBuffer, 1, 1, 1);
 		
 		// We have to wait until compute shader has finished writing to the vertex buffer.
 		// We need a memory barrier here to ensure that the vertex shader reads from the vertex buffer after the compute shader has finished writing to the vertex buffer.
 		// We have a write-after-write hazard here, so we need a memory barrier.
 		// We have not touched the memory read by the vertex shader earlier, so no execution synchronization is needed.
 		memoryBarrier(frameInfo.commandBuffer, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_VERTEX_SHADER_BIT);
-		
-		
-		
+		vkQueueWaitIdle(narwhalDevice.presentQueue());
+	
 
+	}*/
+
+	void ComputeTestSystem::render(FrameInfo& frameInfo) {
+		vkResetFences(narwhalDevice.device(), 1, &frameInfo.computeFence);
+		VkCommandBuffer commandBuffer = narwhalDevice.beginSingleTimeCommands();
+		
+		narwhalPipeline->bind(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &frameInfo.computeDescriptorSet, 0, nullptr);
+		vkCmdDispatch(commandBuffer, 1, 1, 1);
+
+
+		narwhalDevice.endSingleTimeCommands(commandBuffer,frameInfo.computeFence);
 	}
-
 
 }
