@@ -2,7 +2,7 @@
 
 
 namespace narwhal {
-	NarwhalStorageImage::NarwhalStorageImage(NarwhalDevice& device, std::string name, uint32_t width, uint32_t height):narwhalDevice(device), name(name), width(width), height(height)
+	NarwhalStorageImage::NarwhalStorageImage(NarwhalDevice& device, uint32_t width, uint32_t height, std::string name):narwhalDevice(device), name(name), width(width), height(height)
 	{
 		createStorageImage(width, height);
 		createImageView();
@@ -10,9 +10,7 @@ namespace narwhal {
 	}
 	NarwhalStorageImage::~NarwhalStorageImage()
 	{
-		vkDestroyImageView(narwhalDevice.device(), imageView, nullptr);
-		vkDestroyImage(narwhalDevice.device(), image, nullptr);
-		vkFreeMemory(narwhalDevice.device(), imageMemory, nullptr);
+		destroy();
 	}
 	void NarwhalStorageImage::createStorageImage(uint32_t width, uint32_t height)
 	{
@@ -73,5 +71,34 @@ namespace narwhal {
 		if (vkCreateImageView(narwhalDevice.device(), &imageViewCreateInfo, nullptr, &imageView) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create texture image view!");
 		}
+	}
+	void NarwhalStorageImage::resize(uint32_t width, uint32_t height)
+	{
+		if (width == this->width && height == this->height) {
+			return;
+		}
+
+		destroy();
+
+		this->width = width;
+		this->height = height;
+
+		createStorageImage(width, height);
+		createImageView();
+	}
+	VkDescriptorImageInfo NarwhalStorageImage::getDescriptorImageInfo()
+	{
+
+		return VkDescriptorImageInfo{
+			VK_NULL_HANDLE,
+			imageView,
+			VK_IMAGE_LAYOUT_GENERAL
+		};
+	}
+	void NarwhalStorageImage::destroy()
+	{
+		vkDestroyImageView(narwhalDevice.device(), imageView, nullptr);
+		vkDestroyImage(narwhalDevice.device(), image, nullptr);
+		vkFreeMemory(narwhalDevice.device(), imageMemory, nullptr);
 	}
 }

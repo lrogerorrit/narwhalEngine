@@ -100,10 +100,13 @@ namespace narwhal
     // this tells imgui that we're done setting up the current frame,
     // then gets the draw data from imgui and uses it to record to the provided
     // command buffer the necessary draw commands
-    void NarwhalImgui::render(FrameInfo& frameInfo)
+    void NarwhalImgui::render(FrameInfo& frameInfo){
+        this->render( frameInfo.commandBuffer); 
+    }
+    void NarwhalImgui::render(VkCommandBuffer commandBuffer)
     {
         ImGui::Render();
         ImDrawData *drawdata = ImGui::GetDrawData();
-        ImGui_ImplVulkan_RenderDrawData(drawdata, frameInfo.commandBuffer);
+        ImGui_ImplVulkan_RenderDrawData(drawdata, commandBuffer);
     }
 }

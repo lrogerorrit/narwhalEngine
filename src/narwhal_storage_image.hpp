@@ -12,7 +12,7 @@ namespace narwhal {
 	class NarwhalStorageImage
 	{
 		public:
-		NarwhalStorageImage(NarwhalDevice& device, std::string name, uint32_t width, uint32_t height);
+		NarwhalStorageImage(NarwhalDevice& device, uint32_t width, uint32_t height,std::string name="STORAGE_IMAGE");
 		~NarwhalStorageImage();
 
 		void createStorageImage(uint32_t width, uint32_t height);
@@ -25,9 +25,16 @@ namespace narwhal {
 		uint32_t getWidth() { return width; };
 		uint32_t getHeight() { return height; };
 
+		void resize(uint32_t width, uint32_t height);
+
+		VkDescriptorImageInfo getDescriptorImageInfo();
+
+
 
 
 		private:
+
+			void destroy();
 
 			NarwhalDevice& narwhalDevice;
 

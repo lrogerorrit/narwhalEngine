@@ -44,6 +44,7 @@ namespace narwhal {
 		void newFrame();
 
 		void render(FrameInfo& frameInfo);
+		void render(VkCommandBuffer commandBuffer);
 	private:
 		
         // Not needed for imgui
