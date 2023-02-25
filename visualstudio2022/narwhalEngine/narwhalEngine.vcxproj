@@ -170,6 +170,7 @@ call compile.bat</Command>
     <ClCompile Include="..\..\external\imgui\imgui_impl_vulkan.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\..\external\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\..\src\black_hole_app.cpp" />
     <ClCompile Include="..\..\src\first_app.cpp" />
     <ClCompile Include="..\..\src\keyboard_movement_controller.cpp" />
     <ClCompile Include="..\..\src\main.cpp" />
@@ -199,6 +200,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\external\imgui\imstb_rectpack.h" />
     <ClInclude Include="..\..\external\imgui\imstb_textedit.h" />
     <ClInclude Include="..\..\external\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\..\src\black_hole_app.hpp" />
     <ClInclude Include="..\..\src\first_app.hpp" />
     <ClInclude Include="..\..\src\keyboard_movement_controller.hpp" />
     <ClInclude Include="..\..\src\narwhal_buffer.hpp" />

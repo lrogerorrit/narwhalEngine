@@ -121,6 +121,9 @@
     <ClCompile Include="..\..\src\systems\compute_shader_test.cpp">
       <Filter>systems</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\black_hole_app.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp">
@@ -204,6 +207,9 @@
     <ClInclude Include="..\..\src\systems\compute_shader_test.hpp">
       <Filter>systems</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\black_hole_app.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\compile.bat">
@@ -211,12 +217,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\..\data\shaders\simple_shader.frag">
-      <Filter>shaders\fragment</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\..\data\shaders\simple_shader.vert">
-      <Filter>shaders\vertex</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\fragment</Filter>
     </CustomBuild>
@@ -228,6 +228,21 @@
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\compute</Filter>
