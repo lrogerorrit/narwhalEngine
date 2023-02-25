@@ -89,7 +89,7 @@ namespace narwhal {
 		//Volumetric Noise Params
 		float stepSize= 0.01f;
 		float absorptionFactor = .5f;
-		float noiseCuttoff = .5f;
+		float noiseCutoff = .5f;
 		float noiseMultiplier = 1.f;
 		int maxSteps = 20;
 

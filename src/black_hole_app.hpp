@@ -5,6 +5,7 @@
 #include "narwhal_renderer.hpp"
 #include "narwhal_game_object.hpp"
 #include "narwhal_descriptors.hpp"
+#include "narwhal_frame_info.hpp"
 
 //std
 #include <memory>
@@ -12,11 +13,13 @@
 
 
 namespace narwhal {
+
+	class NarwhalImgui;
 	class BlackHoleApp
 	{
 	public:
-		static constexpr int WIDTH = 800;
-		static constexpr int HEIGHT = 600;
+		static constexpr int WIDTH = 1920*.9;
+		static constexpr int HEIGHT = 1080*.9;
 
 		BlackHoleApp();
 		~BlackHoleApp();
@@ -25,8 +28,14 @@ namespace narwhal {
 		BlackHoleApp& operator=(const BlackHoleApp&) = delete;
 
 		void run();
+		
+
 
 	private:
+
+		void renderImgui(NarwhalImgui& narwhalImgui, VkCommandBuffer commandBuffer);
+
+
 		NarwhalWindow narwhalWindow {WIDTH,HEIGHT,"Narwhal Engine V0.1"};
 		NarwhalDevice narwhalDevice {narwhalWindow};
 		NarwhalRenderer narwhalRenderer {narwhalWindow,narwhalDevice};
@@ -35,6 +44,9 @@ namespace narwhal {
 
 		VkFence fence;
 
+		BlackHoleParameters blackHoleParameters;
+
+		bool showImgui = true;
 
 	};
 }
