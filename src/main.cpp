@@ -1,4 +1,4 @@
-#include "first_app.hpp"
+#include "black_hole_app.hpp"
 
 //std
 #include <iostream>
@@ -8,7 +8,7 @@
 int main() {
 
 	try {
-		narwhal::FirstApp app{};
+		narwhal::BlackHoleApp app{};
 		app.run();
 	}
 	catch (const std::exception& e) {
