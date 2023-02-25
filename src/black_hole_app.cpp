@@ -3,7 +3,10 @@
 #include "keyboard_movement_controller.hpp"
 #include "narwhal_camera.hpp"
 #include "narwhal_buffer.hpp"
+#include "narwhal_storage_image.hpp"
+
 #include "systems/narwhal_imgui.hpp"
+
 
 
 //libs
@@ -29,10 +32,12 @@ namespace narwhal {
 	//										https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 
 	BlackHoleApp::BlackHoleApp() {
-		const int POOL_SIZE_COUNT = 1;
+		const int POOL_SETS_COUNT = 3;
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*POOL_SIZE_COUNT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT* POOL_SETS_COUNT)
 			.build();
 
 		//Load Fence
@@ -56,6 +61,14 @@ namespace narwhal {
 			narwhalRenderer.getImageCount() };
 
 		// Make Buffers
+		std::vector<std::unique_ptr<NarwhalBuffer>> parameterBuffers( NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers( NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		// Make Storage Images
+		std::vector<std::unique_ptr<NarwhalStorageImage>> storageImages( NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+
+		for (int i = 0; i < NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
+			
+		}
 
 
 	}
