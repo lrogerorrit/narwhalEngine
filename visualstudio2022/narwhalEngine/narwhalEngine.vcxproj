@@ -186,6 +186,7 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\narwhal_storage_image.cpp" />
     <ClCompile Include="..\..\src\narwhal_swap_chain.cpp" />
     <ClCompile Include="..\..\src\narwhal_window.cpp" />
+    <ClCompile Include="..\..\src\systems\black_hole_compute_system.cpp" />
     <ClCompile Include="..\..\src\systems\compute_shader_test.cpp" />
     <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp" />
     <ClCompile Include="..\..\src\systems\point_light_system.cpp" />
@@ -217,6 +218,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\narwhal_storage_image.hpp" />
     <ClInclude Include="..\..\src\narwhal_swap_chain.hpp" />
     <ClInclude Include="..\..\src\narwhal_window.hpp" />
+    <ClInclude Include="..\..\src\systems\black_hole_compute_system.hpp" />
     <ClInclude Include="..\..\src\systems\compute_shader_test.hpp" />
     <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp" />
     <ClInclude Include="..\..\src\systems\point_light_system.hpp" />
