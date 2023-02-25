@@ -97,7 +97,13 @@ namespace narwhal {
 		float diskMultiplier = 1.f;
 		float starMultiplier = 1.f;
 
+	};
 
+	struct BlackHoleComputeData
+	{
+		BlackHoleParameters params;
+		float time = 0;
+		bool hardCheck = false;
 
 	};
 }
