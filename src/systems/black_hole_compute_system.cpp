@@ -52,16 +52,16 @@ namespace narwhal {
 
 	}
 
-	void BlackHoleComputeSystem::render(FrameInfo& frameInfo,BlackHoleParameters& parameters,glm::uvec2 size)
+	void BlackHoleComputeSystem::render(BlackHoleFrameInfo& frameInfo,BlackHoleParameters& parameters, VkExtent2D& size)
 	{
 		vkResetFences(narwhalDevice.device(), 1, &frameInfo.computeFence);
 		VkCommandBuffer commandBuffer = narwhalDevice.beginSingleTimeCommands();
 		NarwhalPipeline& pipeline = parameters.blackHoleType == BlackHoleType::Schwarzchild ? *schwarzchildPipeline : *kerrPipeline;
-		pipeline.bind(commandBuffer);
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &frameInfo.computeDescriptorSet, 0, nullptr);
+		pipeline.bind(commandBuffer,VK_PIPELINE_BIND_POINT_COMPUTE);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 2, &frameInfo.computeDescriptorSet, 0, nullptr);
 
-		int groupsX= (int) ceil( size.x/ COMP_LOCAL_X);
-		int groupsY = (int)ceil(size.y / COMP_LOCAL_Y);
+		int groupsX= (int) ceil( size.width/ COMP_LOCAL_X);
+		int groupsY = (int)ceil(size.height / COMP_LOCAL_Y);
 		vkCmdDispatch(commandBuffer, groupsX,groupsY, 1); //TODO: Calculate dispatch size
 
 		narwhalDevice.endSingleTimeCommands(commandBuffer,frameInfo.computeFence);

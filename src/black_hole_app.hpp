@@ -44,7 +44,6 @@ namespace narwhal {
 		std::unique_ptr<NarwhalDescriptorPool> globalPool {};
 
 		VkFence fence;
-
 		BlackHoleParameters blackHoleParameters;
 
 		bool showImgui = true;

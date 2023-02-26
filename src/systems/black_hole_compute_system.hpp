@@ -27,7 +27,7 @@ namespace narwhal {
 		BlackHoleComputeSystem(const BlackHoleComputeSystem&) = delete; // Remove copy constructor
 		BlackHoleComputeSystem& operator=(const BlackHoleComputeSystem&) = delete; // Remove copy assignment operator
 
-		void render(FrameInfo& frameInfo, BlackHoleParameters& parameters,glm::uvec2 size);
+		void render(BlackHoleFrameInfo& frameInfo, BlackHoleParameters& parameters, VkExtent2D& size);
 
 	private:
 		void createPipelineLayout(VkDescriptorSetLayout setLayout);

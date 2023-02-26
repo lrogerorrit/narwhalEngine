@@ -106,4 +106,13 @@ namespace narwhal {
 		bool hardCheck = false;
 
 	};
+
+	struct BlackHoleFrameInfo {
+		int frameIndex;
+		float frameTime;
+		VkCommandBuffer commandBuffer;
+		VkDescriptorSet renderDescriptorSet;
+		VkDescriptorSet computeDescriptorSet;
+		VkFence computeFence;
+	};
 }

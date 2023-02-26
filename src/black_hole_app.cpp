@@ -6,6 +6,7 @@
 #include "narwhal_cubemap.hpp"
 
 #include "systems/narwhal_imgui.hpp"
+#include "systems/black_hole_compute_system.hpp"
 
 
 
@@ -153,12 +154,13 @@ namespace narwhal {
 		};
 
 		//Load Systems
+		BlackHoleComputeSystem blackHoleComputeSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(), computeSetLayout->getDescriptorSetLayout()};
 
 		//Load Camera
 		NarwhalCamera camera{};
 
 		auto currentTime= std::chrono::high_resolution_clock::now();
-
+		VkExtent2D oldSize = narwhalWindow.getExtent();
 		// Main Loop
 		while (!narwhalWindow.shouldClose()) {
 			glfwPollEvents(); 
@@ -168,16 +170,24 @@ namespace narwhal {
 			currentTime = newTime;
 			deltaTime = glm::min(deltaTime, MAX_DT);
 			
-			
+			//Update size (TODO)
+			VkExtent2D newSize = narwhalWindow.getExtent();
+			if (newSize.width != oldSize.width || newSize.height != oldSize.height) {
+				oldSize = narwhalWindow.getExtent();
+				//TODO: Change size of images
+			}
+
 
 			
 
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
-
+				int frameIndex = narwhalRenderer.getFrameIndex();
+				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,renderDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],fence };  //TODO: Check if need to replace delta time by accumulated time
+				
+				blackHoleComputeSystem.render(frameInfo, blackHoleParameters, newSize);
 
 				
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
-
 				renderImgui(narwhalImgui, commandBuffer);
 				narwhalRenderer.endSwapChainRenderPass(commandBuffer);
 				narwhalRenderer.endFrame();
