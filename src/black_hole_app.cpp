@@ -31,10 +31,12 @@ namespace narwhal {
 	//										https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 
 	BlackHoleApp::BlackHoleApp() {
-		const int POOL_SETS_COUNT = 3;
+		const int POOL_SETS_COUNT = 5;
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT * POOL_SETS_COUNT)
 			.build();
@@ -77,16 +79,19 @@ namespace narwhal {
 
 			parameterBuffers[i]->map();
 			uboBuffers[i]->map();
+			
 		}
 
 		auto computeSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT) // Parameters
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Output Image
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Color Image
+			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Position Image
+			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Direction Image
 			.build();
 
 		auto renderSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS) // Global UBO
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT) // Image to render
+			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT) // Color Image
 			.build();
 
 
@@ -96,10 +101,11 @@ namespace narwhal {
 
 		for (int i = 0; i < computeDescriptorSets.size(); i++) {
 			auto paramBufferInfo = parameterBuffers[i]->descriptorInfo();
+			auto colorImageInfo = storageImages[i]->getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
 				.writeBuffer(0, &paramBufferInfo)
-				//.writeImage(1, &storageImages[i]->getDescriptorImageInfo())
+				.writeImage(1, &colorImageInfo)
 				.build(computeDescriptorSets[i]);
 		}
 

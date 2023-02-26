@@ -17,11 +17,7 @@ namespace narwhal {
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) {
 		
-		//Supress unrecognized structure validation layer
-		if (strstr(pCallbackData->pMessage, "Emulation found unrecognized structure type in"))
-			return VK_FALSE;
-
-		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
 
 		return VK_FALSE;
 	}
@@ -84,9 +80,9 @@ namespace narwhal {
 		VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
 		appInfo.pApplicationName = "Black Hole App";
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.applicationVersion = VK_MAKE_VERSION(0, 1,0 );
 		appInfo.pEngineName = "Narwhal Engine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+		appInfo.engineVersion = VK_MAKE_VERSION(0, 5, 0);
 		appInfo.apiVersion = VK_API_VERSION_1_3;
 
 		VkInstanceCreateInfo createInfo = {};

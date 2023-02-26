@@ -88,12 +88,12 @@ namespace narwhal {
 	}
 	VkDescriptorImageInfo NarwhalStorageImage::getDescriptorImageInfo()
 	{
-
-		return VkDescriptorImageInfo{
-			VK_NULL_HANDLE,
-			imageView,
-			VK_IMAGE_LAYOUT_GENERAL
-		};
+		VkDescriptorImageInfo descriptorImageInfo{};
+		
+		descriptorImageInfo.sampler= VK_NULL_HANDLE;
+		descriptorImageInfo.imageView = imageView;
+		descriptorImageInfo.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
+		return descriptorImageInfo;
 	}
 	void NarwhalStorageImage::destroy()
 	{
