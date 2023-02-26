@@ -31,10 +31,11 @@ namespace narwhal {
 	//										https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 
 	BlackHoleApp::BlackHoleApp() {
-		const int POOL_SETS_COUNT = 5;
+		const int POOL_SETS_COUNT = 6;
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -61,13 +62,15 @@ namespace narwhal {
 			narwhalRenderer.getSwapChainRenderPass(),
 			narwhalRenderer.getImageCount() };
 
-		//TODO: Maybe make so there is only 1 parameterBuffer
+		
 
 		// Make Buffers
 		std::vector<std::unique_ptr<NarwhalBuffer>> parameterBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		// Make Storage Images
-		std::vector<std::unique_ptr<NarwhalStorageImage>> storageImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<NarwhalStorageImage>> storageColorImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<NarwhalStorageImage>> storagePositionImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::vector<std::unique_ptr<NarwhalStorageImage>> storageDirectionImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkExtent2D swapChainExtent = narwhalWindow.getExtent();
 
@@ -75,7 +78,9 @@ namespace narwhal {
 
 			parameterBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(BlackHoleComputeData),1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			uboBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(GlobalUbo),1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			storageImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+			storageColorImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+			storagePositionImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+			storageDirectionImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 
 			parameterBuffers[i]->map();
 			uboBuffers[i]->map();
@@ -101,20 +106,25 @@ namespace narwhal {
 
 		for (int i = 0; i < computeDescriptorSets.size(); i++) {
 			auto paramBufferInfo = parameterBuffers[i]->descriptorInfo();
-			auto colorImageInfo = storageImages[i]->getDescriptorImageInfo();
+			auto colorImageInfo = storageColorImages[i]->getDescriptorImageInfo();
+			auto positionImageInfo = storagePositionImages[i]->getDescriptorImageInfo();
+			auto directionImageInfo = storageDirectionImages[i]->getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
 				.writeBuffer(0, &paramBufferInfo)
 				.writeImage(1, &colorImageInfo)
+				.writeImage(2, &positionImageInfo)
+				.writeImage(3, &directionImageInfo)
 				.build(computeDescriptorSets[i]);
 		}
 
 		for (int i = 0;  i < renderDescriptorSets.size();i++){
 			auto uboBufferInfo = uboBuffers[i]->descriptorInfo();
+			auto colorImageInfo = storageColorImages[i]->getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
 				.writeBuffer(0, &uboBufferInfo)
-				//.writeImage(1, &storageImages[i]->getDescriptorImageInfo())
+				.writeImage(1, &colorImageInfo)
 				.build(renderDescriptorSets[i]);		
 		};
 
