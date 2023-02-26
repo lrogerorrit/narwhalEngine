@@ -17,11 +17,14 @@ namespace narwhal {
 			
 		~NarwhalCubemap();
 
+		VkDescriptorImageInfo getDescriptorImageInfo();
+
 
 		private:
 
 			void createCubemapImage(const std::vector<std::string>& faces);
 			void createCubemapImageView();
+			void createCubemapSampler();
 
 			NarwhalDevice& narwhalDevice;
 			uint32_t width, height;
@@ -29,6 +32,7 @@ namespace narwhal {
 			VkImage image = nullptr;
 			VkImageView imageView = nullptr;
 			VkDeviceMemory imageMemory = nullptr;
+			VkSampler sampler = nullptr;
 
 			std::vector<std::vector<uint8_t>> faceData{};
 

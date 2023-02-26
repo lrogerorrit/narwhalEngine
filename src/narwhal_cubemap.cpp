@@ -1,4 +1,5 @@
 #include "narwhal_cubemap.hpp"
+#include "narwhal_pipeline.hpp"
 
 namespace narwhal {
 	NarwhalCubemap::NarwhalCubemap(NarwhalDevice& device, uint32_t width, uint32_t height, std::string& rightFace, std::string& leftFace, std::string& topFace, std::string& bottomFace, std::string& frontFace, std::string& backFace)
@@ -7,6 +8,7 @@ namespace narwhal {
 		std::vector<std::string> faces={rightFace,leftFace,topFace,bottomFace,frontFace,backFace};
 		createCubemapImage(faces);
 		createCubemapImageView();
+		createCubemapSampler();
 		
 	}
 	NarwhalCubemap::~NarwhalCubemap()
@@ -14,6 +16,16 @@ namespace narwhal {
 		vkDestroyImageView(narwhalDevice.device(), imageView, nullptr);
 		vkDestroyImage(narwhalDevice.device(), image, nullptr);
 		vkFreeMemory(narwhalDevice.device(), imageMemory, nullptr);
+		vkDestroySampler(narwhalDevice.device(), sampler, nullptr);
+	}
+	VkDescriptorImageInfo NarwhalCubemap::getDescriptorImageInfo()
+	{
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = imageView;
+		imageInfo.sampler = sampler;
+
+		return imageInfo;
 	}
 	void NarwhalCubemap::createCubemapImage(const std::vector<std::string>& faces)
 	{
@@ -50,6 +62,7 @@ namespace narwhal {
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		imageCreateInfo.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 		if (vkCreateImage(narwhalDevice.device(), &imageCreateInfo, nullptr, &image) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to create image");
@@ -74,32 +87,29 @@ namespace narwhal {
 		
 		//Load the cube faces
 
+
+
+		
+		
+		
 		for (int i = 0; i < faces.size(); i++)
 		{
+
+			VkCommandBuffer commandBuffer = narwhalDevice.beginSingleTimeCommands();
 			NarwhalBuffer stagingBuffer{ narwhalDevice,faceData[i].size(),1,VK_BUFFER_USAGE_TRANSFER_SRC_BIT,VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT };
 			stagingBuffer.map();
 			stagingBuffer.writeToBuffer(faceData[i].data(), faceData[i].size());
 
-			VkBufferImageCopy bufferImageCopy{};
-			bufferImageCopy.bufferOffset = 0;
-			bufferImageCopy.bufferRowLength = 0;
-			bufferImageCopy.bufferImageHeight = 0;
-			bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			bufferImageCopy.imageSubresource.mipLevel = 0;
-			bufferImageCopy.imageSubresource.baseArrayLayer = i;
-			bufferImageCopy.imageSubresource.layerCount = 1;
-			bufferImageCopy.imageOffset = { 0,0,0 };
-			bufferImageCopy.imageExtent = { width,height,1 };
-
 			//We now prepare the image for copying by transitioning it to the VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL layout.
-			narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-			narwhalDevice.copyBufferToImage(stagingBuffer.getBuffer(), image, width, height, 1, i);
+			
+			narwhalDevice.transitionImageLayout(commandBuffer, image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, i, 1);
+			narwhalDevice.copyBufferToImage(commandBuffer,stagingBuffer.getBuffer(), image, width, height, 1, i);
 
 			//We then transition the image to the VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL layout, which is the layout that we will use to sample from the image in the shader.
-			narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			stagingBuffer.unmap();
+			narwhalDevice.endSingleTimeCommands(commandBuffer);
 		}
+			narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,0,6);
 	}
 	void NarwhalCubemap::createCubemapImageView()
 	{
@@ -117,5 +127,32 @@ namespace narwhal {
 		if (vkCreateImageView(narwhalDevice.device(), &imageViewCreateInfo, nullptr, &imageView) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create texture image view!");
 		}
+	}
+	void NarwhalCubemap::createCubemapSampler()
+	{
+		VkSamplerCreateInfo samplerInfo{};
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;
+		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		samplerInfo.anisotropyEnable = VK_FALSE;
+		samplerInfo.maxAnisotropy = 1.0f;
+		samplerInfo.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_BLACK;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipLodBias = 0.0f;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 0.0f;
+		
+
+		
+		if (vkCreateSampler(narwhalDevice.device(), &samplerInfo, nullptr, &sampler) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create texture sampler!");
+		}
+
 	}
 }

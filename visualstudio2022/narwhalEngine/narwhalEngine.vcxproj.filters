@@ -133,9 +133,6 @@
     <ClCompile Include="..\..\src\narwhal_cubemap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\narwhal_image_v2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\first_app.hpp">
@@ -231,9 +228,6 @@
     <ClInclude Include="..\..\src\narwhal_cubemap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\narwhal_image_v2.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\src\compile.bat">
@@ -294,6 +288,27 @@
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\compute</Filter>

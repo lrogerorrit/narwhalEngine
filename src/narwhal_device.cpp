@@ -511,9 +511,16 @@ namespace narwhal {
 		endSingleTimeCommands(commandBuffer);
 	}
 
-	void NarwhalDevice::copyBufferToImage(
-		VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerNumber) {
+	void NarwhalDevice::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerNumber) {
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+		copyBufferToImage(commandBuffer, buffer, image, width, height, layerCount, layerNumber);
+
+		endSingleTimeCommands(commandBuffer);
+	}
+
+	void NarwhalDevice::copyBufferToImage(VkCommandBuffer commandBuffer,
+		VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerNumber) {
+		
 
 		VkBufferImageCopy region{};
 		region.bufferOffset = 0;
@@ -535,7 +542,7 @@ namespace narwhal {
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&region);
-		endSingleTimeCommands(commandBuffer);
+		
 	}
 
 	void NarwhalDevice::createImageWithInfo(
@@ -564,8 +571,13 @@ namespace narwhal {
 		}
 	}
 
-	void NarwhalDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
+	void NarwhalDevice::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t layerNumber, uint32_t layerCount) {
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+		transitionImageLayout(commandBuffer, image, format, oldLayout, newLayout);
+		endSingleTimeCommands(commandBuffer);
+	}
+
+	void NarwhalDevice::transitionImageLayout(VkCommandBuffer commandBuffer , VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t layerNumber, uint32_t layerCount) {
 
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -577,8 +589,8 @@ namespace narwhal {
 		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		barrier.subresourceRange.baseArrayLayer = layerNumber;
+		barrier.subresourceRange.layerCount = layerCount;
 
 		// We need to add transition barriers so the validation layers dont complain (https://vulkan-tutorial.com/Texture_mapping/Images#page_Transition-barrier-masks)
 		VkPipelineStageFlags sourceStage;
@@ -612,7 +624,7 @@ namespace narwhal {
 			1, &barrier
 		);
 
-		endSingleTimeCommands(commandBuffer);
+		
 	}
 
 }  // namespace narwhal

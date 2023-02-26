@@ -3,6 +3,7 @@
 #include "narwhal_camera.hpp"
 #include "narwhal_buffer.hpp"
 #include "narwhal_storage_image.hpp"
+#include "narwhal_cubemap.hpp"
 
 #include "systems/narwhal_imgui.hpp"
 
@@ -22,6 +23,8 @@
 #include <array>
 #include <iostream>
 #include <chrono>
+#include <string>
+
 
 #define MAX_DT 1.f //TODO: Change and tune
 
@@ -31,7 +34,7 @@ namespace narwhal {
 	//										https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
 
 	BlackHoleApp::BlackHoleApp() {
-		const int POOL_SETS_COUNT = 6;
+		const int POOL_SETS_COUNT = 8;
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
@@ -39,6 +42,8 @@ namespace narwhal {
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT * POOL_SETS_COUNT)
 			.build();
 
@@ -72,6 +77,12 @@ namespace narwhal {
 		std::vector<std::unique_ptr<NarwhalStorageImage>> storagePositionImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		std::vector<std::unique_ptr<NarwhalStorageImage>> storageDirectionImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 
+		//Make Cubemap Images
+		std::vector<std::unique_ptr<NarwhalCubemap>> cubemapImages(1);
+
+		//Make other Images
+
+
 		VkExtent2D swapChainExtent = narwhalWindow.getExtent();
 
 		for (int i = 0; i < NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
@@ -81,6 +92,15 @@ namespace narwhal {
 			storageColorImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 			storagePositionImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 			storageDirectionImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+			if (i == 0) {
+				std::string rightPath = "data/textures/cubemap/right.png";
+				std::string leftPath = "data/textures/cubemap/left.png";
+				std::string topPath = "data/textures/cubemap/top.png";
+				std::string bottomPath = "data/textures/cubemap/bottom.png";
+				std::string frontPath = "data/textures/cubemap/front.png";
+				std::string backPath = "data/textures/cubemap/back.png";
+				cubemapImages[i] = std::make_unique<NarwhalCubemap>(narwhalDevice,1024,1024,rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
+			}
 
 			parameterBuffers[i]->map();
 			uboBuffers[i]->map();
@@ -92,6 +112,8 @@ namespace narwhal {
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Color Image
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Position Image
 			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Direction Image
+			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Background Cube map Image
+			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Temp Image
 			.build();
 
 		auto renderSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
@@ -109,12 +131,14 @@ namespace narwhal {
 			auto colorImageInfo = storageColorImages[i]->getDescriptorImageInfo();
 			auto positionImageInfo = storagePositionImages[i]->getDescriptorImageInfo();
 			auto directionImageInfo = storageDirectionImages[i]->getDescriptorImageInfo();
+			auto backgroundCubeMapInfo = cubemapImages[0]->getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
 				.writeBuffer(0, &paramBufferInfo)
 				.writeImage(1, &colorImageInfo)
 				.writeImage(2, &positionImageInfo)
 				.writeImage(3, &directionImageInfo)
+				.writeImage(4, &backgroundCubeMapInfo)
 				.build(computeDescriptorSets[i]);
 		}
 

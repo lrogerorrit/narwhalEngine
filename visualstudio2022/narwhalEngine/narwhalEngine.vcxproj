@@ -181,7 +181,6 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\narwhal_device.cpp" />
     <ClCompile Include="..\..\src\narwhal_game_object.cpp" />
     <ClCompile Include="..\..\src\narwhal_image.cpp" />
-    <ClCompile Include="..\..\src\narwhal_image_v2.cpp" />
     <ClCompile Include="..\..\src\narwhal_model.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
     <ClCompile Include="..\..\src\narwhal_renderer.cpp" />
@@ -215,7 +214,6 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\narwhal_frame_info.hpp" />
     <ClInclude Include="..\..\src\narwhal_game_object.hpp" />
     <ClInclude Include="..\..\src\narwhal_image.hpp" />
-    <ClInclude Include="..\..\src\narwhal_image_v2.hpp" />
     <ClInclude Include="..\..\src\narwhal_model.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
     <ClInclude Include="..\..\src\narwhal_renderer.hpp" />
