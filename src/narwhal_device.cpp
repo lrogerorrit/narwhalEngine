@@ -512,7 +512,7 @@ namespace narwhal {
 	}
 
 	void NarwhalDevice::copyBufferToImage(
-		VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount) {
+		VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount, uint32_t layerNumber) {
 		VkCommandBuffer commandBuffer = beginSingleTimeCommands();
 
 		VkBufferImageCopy region{};
@@ -522,7 +522,7 @@ namespace narwhal {
 
 		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.baseArrayLayer = layerNumber;
 		region.imageSubresource.layerCount = layerCount;
 
 		region.imageOffset = { 0, 0, 0 };
