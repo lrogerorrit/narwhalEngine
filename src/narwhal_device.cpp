@@ -6,6 +6,8 @@
 #include <set>
 #include <unordered_set>
 
+
+
 namespace narwhal {
 
 	// local callback functions
@@ -14,6 +16,11 @@ namespace narwhal {
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) {
+		
+		//Supress unrecognized structure validation layer
+		if (strstr(pCallbackData->pMessage, "Emulation found unrecognized structure type in"))
+			return VK_FALSE;
+
 		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
 		return VK_FALSE;
