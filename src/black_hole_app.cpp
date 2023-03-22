@@ -4,9 +4,11 @@
 #include "narwhal_buffer.hpp"
 #include "narwhal_storage_image.hpp"
 #include "narwhal_cubemap.hpp"
+#include "narwhal_model.hpp"
 
 #include "systems/narwhal_imgui.hpp"
 #include "systems/black_hole_compute_system.hpp"
+#include "systems/quad_render_system.hpp"
 
 
 
@@ -33,6 +35,11 @@
 namespace narwhal {
 	//For more alignment info check here:	https://registry.khronos.org/vulkan/specs/1.0-wsi_extensions/html/vkspec.html#interfaces-resources-layout
 	//										https://www.oreilly.com/library/view/opengl-programming-guide/9780132748445/app09lev1sec2.html
+
+	struct Vertex {
+		glm::vec3 position;
+		glm::vec2 uv;
+	};
 
 	BlackHoleApp::BlackHoleApp() {
 		const int POOL_SETS_COUNT = 8;
@@ -120,8 +127,8 @@ namespace narwhal {
 		
 
 		auto renderSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS) // Global UBO
-			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT) // Color Image
+			//.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS) // Global UBO
+			.addBinding(0, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_FRAGMENT_BIT) // Color Image
 			.build();
 
 
@@ -150,18 +157,23 @@ namespace narwhal {
 			auto colorImageInfo = storageColorImage.getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
-				.writeBuffer(0, &uboBufferInfo)
-				.writeImage(1, &colorImageInfo)
+				//.writeBuffer(0, &uboBufferInfo)
+				.writeImage(0, &colorImageInfo)
 				.build(renderDescriptorSets[i]);		
 		};
 
+		
+
+
+
 		//Load Systems
 		BlackHoleComputeSystem blackHoleComputeSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(), computeSetLayout->getDescriptorSetLayout()};
+		QuadRenderSystem quadRenderSystem{ narwhalDevice, narwhalRenderer.getSwapChainRenderPass(), renderSetLayout->getDescriptorSetLayout()};
 
 		//Load Camera
 		NarwhalCamera camera{};
-
-		auto currentTime= std::chrono::high_resolution_clock::now();
+		auto startTime = std::chrono::high_resolution_clock::now();
+		auto currentTime = startTime;
 		VkExtent2D oldSize = narwhalWindow.getExtent();
 		// Main Loop
 		while (!narwhalWindow.shouldClose()) {
@@ -175,7 +187,7 @@ namespace narwhal {
 			//Update size (TODO)
 			VkExtent2D newSize = narwhalWindow.getExtent();
 			if (newSize.width != oldSize.width || newSize.height != oldSize.height) {
-				oldSize = narwhalWindow.getExtent();
+				oldSize = newSize;
 				//TODO: Change size of images
 			}
 
@@ -185,11 +197,14 @@ namespace narwhal {
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
 				
+				
+				
+				computeData.windowSize = glm::vec2(newSize.width, newSize.height);
+				computeData.time = std::chrono::duration<float, std::chrono::seconds::period>(newTime - startTime).count();
 				//Update compute descriptor sets
 				
-
 				//Update computeDescriptorSets 0 with blackHoleParameters
-				parameterBuffers[frameIndex]->writeToBuffer(&blackHoleParameters, sizeof(BlackHoleParameters));
+				parameterBuffers[frameIndex]->writeToBuffer(&computeData, sizeof(BlackHoleComputeData));
 				
 				auto paramBufferInfo = parameterBuffers[frameIndex]->descriptorInfo();
 				auto colorImageInfo = storageColorImage.getDescriptorImageInfo();
@@ -206,12 +221,20 @@ namespace narwhal {
 					.overwrite(computeDescriptorSets[frameIndex]);
 
 
-				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,renderDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],fence };  //TODO: Check if need to replace delta time by accumulated time
+				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,computeDescriptorSets[frameIndex],fence };
 
 				blackHoleComputeSystem.render(frameInfo, blackHoleParameters, newSize);
 
+				//Update Render Descriptor Sets
+				NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
+					.writeImage(0, &colorImageInfo)
+					.overwrite(renderDescriptorSets[frameIndex]);
+
+				QuadFrameInfo quadFrameInfo{ frameIndex,commandBuffer,renderDescriptorSets[frameIndex] };
 				
+
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
+				quadRenderSystem.render(quadFrameInfo);	
 				renderImgui(narwhalImgui, commandBuffer);
 				narwhalRenderer.endSwapChainRenderPass(commandBuffer);
 				narwhalRenderer.endFrame();
@@ -239,60 +262,60 @@ namespace narwhal {
 		ImGui::Text("Black Hole Type"); ImGui::SameLine();
 		ImGui::RadioButton("Schwarzschild", &blackHoleType, 0); ImGui::SameLine();
 		ImGui::RadioButton("Kerr", &blackHoleType, 1);
-
-		blackHoleParameters.blackHoleType = (BlackHoleType) blackHoleType;
+		
+		computeData.params.blackHoleType = (BlackHoleType) blackHoleType;
 
 		if (ImGui::CollapsingHeader("Step Size Parameters")) {
-			ImGui::SliderFloat("Time Step", &blackHoleParameters.timeStep, 0.0f, 1.0f);
-			ImGui::SliderFloat("Pole Margin", &blackHoleParameters.poleMargin, 0.f, 1.f,"%.4f");
-			ImGui::SliderFloat("Pole Step", &blackHoleParameters.poleStep, 0.f, 1.f,"%.5f");
-			ImGui::SliderFloat("Escape Distance", &blackHoleParameters.escapeDistance, 100, 1000000,"%.1f");
+			ImGui::SliderFloat("Time Step", &computeData.params.timeStep, 0.0f, 1.0f);
+			ImGui::SliderFloat("Pole Margin", &computeData.params.poleMargin, 0.f, 1.f,"%.4f");
+			ImGui::SliderFloat("Pole Step", &computeData.params.poleStep, 0.f, 1.f,"%.5f");
+			ImGui::SliderFloat("Escape Distance", &computeData.params.escapeDistance, 100, 1000000,"%.1f");
 		}
 		if (ImGui::CollapsingHeader("Physical Parameters")) {
-			ImGui::SliderFloat("Horizon Radius", &blackHoleParameters.horizonRadius, 0.1f, 2.f, "%.3f");
+			ImGui::SliderFloat("Horizon Radius", &computeData.params.horizonRadius, 0.1f, 2.f, "%.3f");
 
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::BeginDisabled();
-			ImGui::SliderFloat("Spin Factor", &blackHoleParameters.spinFactor, -1.f, 1.f, "%.3f");
+			ImGui::SliderFloat("Spin Factor", &computeData.params.spinFactor, -1.f, 1.f, "%.3f");
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::EndDisabled();
 
-			ImGui::SliderFloat("Disk Max", &blackHoleParameters.diskMax, .1f, 10.f);
-			ImGui::SliderFloat("Disk Temp", &blackHoleParameters.diskTemp, 1E3F, 1E4F);
+			ImGui::SliderFloat("Disk Max", &computeData.params.diskMax, .1f, 10.f);
+			ImGui::SliderFloat("Disk Temp", &computeData.params.diskTemp, 1E3F, 1E4F);
 
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::BeginDisabled();
-			ImGui::SliderFloat("Inner Fallof Rate", &blackHoleParameters.innerFalloffRate, .1f, 10.f, "%.3f");
-			ImGui::SliderFloat("Outer Fallof Rate", &blackHoleParameters.outerFalloffRate, .1f, 10.f, "%.3f");
+			ImGui::SliderFloat("Inner Fallof Rate", &computeData.params.innerFalloffRate, .1f, 10.f, "%.3f");
+			ImGui::SliderFloat("Outer Fallof Rate", &computeData.params.outerFalloffRate, .1f, 10.f, "%.3f");
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::EndDisabled();
 
-			ImGui::SliderFloat("Beam Exponent", &blackHoleParameters.beamExponent, .1f, 10.f, "%.3f");
-			ImGui::SliderFloat("Rotation Speed", &blackHoleParameters.rotationSpeed, .01f, 2.f);
-			ImGui::SliderFloat("Time Delay Factor", &blackHoleParameters.timeDelayFactor, .01f, 1.f);
+			ImGui::SliderFloat("Beam Exponent", &computeData.params.beamExponent, .1f, 10.f, "%.3f");
+			ImGui::SliderFloat("Rotation Speed", &computeData.params.rotationSpeed, .01f, 2.f);
+			ImGui::SliderFloat("Time Delay Factor", &computeData.params.timeDelayFactor, .01f, 1.f);
 
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::BeginDisabled();
-			ImGui::Checkbox("Viscious Disk", &blackHoleParameters.visciousDisk);
-			ImGui::Checkbox("Relative Temp", &blackHoleParameters.relativeTemp);
+			ImGui::Checkbox("Viscious Disk", &computeData.params.visciousDisk);
+			ImGui::Checkbox("Relative Temp", &computeData.params.relativeTemp);
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::EndDisabled();
 
 		}
 
 		if (ImGui::CollapsingHeader("Noise Parameters")) {
-			ImGui::SliderFloat3("Noise Offset", &blackHoleParameters.noiseOffset.x, -1.f, 1.f);
-			ImGui::SliderFloat("Noise Scale", &blackHoleParameters.noiseScale, 0.f, 1.f);
-			ImGui::SliderFloat("Noise Circulation", &blackHoleParameters.noiseCirculation, .01f, 10.f);
-			ImGui::SliderFloat("Noise H", &blackHoleParameters.noiseH, 0.f, 3.f);
-			ImGui::SliderInt("Noise Octaves", &blackHoleParameters.noiseOctaves, 1, 10);
+			ImGui::SliderFloat3("Noise Offset", &computeData.params.noiseOffset.x, -1.f, 1.f);
+			ImGui::SliderFloat("Noise Scale", &computeData.params.noiseScale, 0.f, 1.f);
+			ImGui::SliderFloat("Noise Circulation", &computeData.params.noiseCirculation, .01f, 10.f);
+			ImGui::SliderFloat("Noise H", &computeData.params.noiseH, 0.f, 3.f);
+			ImGui::SliderInt("Noise Octaves", &computeData.params.noiseOctaves, 1, 10);
 		};
 
 		if (ImGui::CollapsingHeader("Volumetric Noise Parameters")) {
-			ImGui::SliderFloat("Step Size", &blackHoleParameters.stepSize, 0.f, 1.f);
-			ImGui::SliderFloat("Absorption Factor", &blackHoleParameters.absorptionFactor, 0.f, 1.f);
-			ImGui::SliderFloat("Noise Cutoff", &blackHoleParameters.noiseCutoff, 0.f, 1.f);
-			ImGui::SliderFloat("Noise Multiplier", &blackHoleParameters.noiseMultiplier, 0.f, 5.f);
-			ImGui::SliderInt("Max Steps", &blackHoleParameters.maxSteps, 1, 1000);
+			ImGui::SliderFloat("Step Size", &computeData.params.stepSize, 0.f, 1.f);
+			ImGui::SliderFloat("Absorption Factor", &computeData.params.absorptionFactor, 0.f, 1.f);
+			ImGui::SliderFloat("Noise Cutoff", &computeData.params.noiseCutoff, 0.f, 1.f);
+			ImGui::SliderFloat("Noise Multiplier", &computeData.params.noiseMultiplier, 0.f, 5.f);
+			ImGui::SliderInt("Max Steps", &computeData.params.maxSteps, 1, 1000);
 		}
 
 		if (ImGui::CollapsingHeader("Brightness Parameters")) {
-			ImGui::SliderFloat("Disk Multiplier", &blackHoleParameters.diskMultiplier, 0.f, 3.f);
-			ImGui::SliderFloat("Stars Multiplier", &blackHoleParameters.starMultiplier, 0.f, 3.f);
+			ImGui::SliderFloat("Disk Multiplier", &computeData.params.diskMultiplier, 0.f, 3.f);
+			ImGui::SliderFloat("Stars Multiplier", &computeData.params.starMultiplier, 0.f, 3.f);
 		}
 		
 

@@ -104,6 +104,7 @@ namespace narwhal {
 		BlackHoleParameters params;
 		float time = 0;
 		bool hardCheck = false;
+		glm::vec2 windowSize{0};
 
 	};
 
@@ -111,8 +112,13 @@ namespace narwhal {
 		int frameIndex;
 		float frameTime;
 		VkCommandBuffer commandBuffer;
-		VkDescriptorSet renderDescriptorSet;
 		VkDescriptorSet computeDescriptorSet;
 		VkFence computeFence;
+	};
+
+	struct QuadFrameInfo {
+		int frameIndex;
+		VkCommandBuffer commandBuffer;
+		VkDescriptorSet renderDescriptorSet;
 	};
 }

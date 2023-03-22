@@ -391,7 +391,6 @@ void main()
 {
     ivec2 id= ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
     vec4 outputColor;
-    
     // Check if id is within window bounds
     if (!checkWindowBound(id.xy))
 	{
@@ -452,5 +451,11 @@ void main()
     }
 
     // Write back color
-    imageStore(colorOutput,id,outputColor);
+    //imageStore(colorOutput,id,outputColor);
+
+    //Debug img Test
+    float randR = Random(vec3(id.x+id.y+bhParams.time, 0.0, 0.0));
+    float randG = Random(vec3(0.0, id.x+id.y+bhParams.time, 0.0));
+    float randB = Random(vec3(0.0, id.x+id.y+bhParams.time, id.x+id.y+bhParams.time));
+    imageStore(colorOutput,id,vec4(randR,randG,randB,1.0));
 }

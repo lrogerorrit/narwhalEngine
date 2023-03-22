@@ -191,6 +191,7 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\systems\compute_shader_test.cpp" />
     <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp" />
     <ClCompile Include="..\..\src\systems\point_light_system.cpp" />
+    <ClCompile Include="..\..\src\systems\quad_render_system.cpp" />
     <ClCompile Include="..\..\src\systems\simple_render_system.cpp" />
     <ClCompile Include="..\..\src\utils\utils.cpp" />
   </ItemGroup>
@@ -224,6 +225,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\systems\compute_shader_test.hpp" />
     <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp" />
     <ClInclude Include="..\..\src\systems\point_light_system.hpp" />
+    <ClInclude Include="..\..\src\systems\quad_render_system.hpp" />
     <ClInclude Include="..\..\src\systems\simple_render_system.hpp" />
     <ClInclude Include="..\..\src\utils\utils.hpp" />
   </ItemGroup>
