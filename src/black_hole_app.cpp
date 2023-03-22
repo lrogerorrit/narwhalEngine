@@ -58,6 +58,13 @@ namespace narwhal {
 		vkDestroyFence(narwhalDevice.device(), fence, nullptr);
 	}
 
+	void BlackHoleApp::updateComputeDescriptors(int frameNum, NarwhalDescriptorSetLayout& setLayout) {
+
+	}
+	void BlackHoleApp::updateRenderDescriptors(int frameNum, NarwhalDescriptorSetLayout& setLayout) {
+
+	}
+
 	void BlackHoleApp::run()
 	{
 		//SETUP
@@ -69,45 +76,38 @@ namespace narwhal {
 			narwhalRenderer.getImageCount() };
 
 		
+		VkExtent2D swapChainExtent = narwhalWindow.getExtent();
 
 		// Make Buffers
 		std::vector<std::unique_ptr<NarwhalBuffer>> parameterBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		// Make Storage Images
-		std::vector<std::unique_ptr<NarwhalStorageImage>> storageColorImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
-		std::vector<std::unique_ptr<NarwhalStorageImage>> storagePositionImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
-		std::vector<std::unique_ptr<NarwhalStorageImage>> storageDirectionImages(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		NarwhalStorageImage storageColorImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+		NarwhalStorageImage storagePositionImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+		NarwhalStorageImage storageDirectionImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 
 		//Make Cubemap Images
-		std::vector<std::unique_ptr<NarwhalCubemap>> cubemapImages(1);
-
+		std::string rightPath = "data/textures/cubemap/right.png";
+		std::string leftPath = "data/textures/cubemap/left.png";
+		std::string topPath = "data/textures/cubemap/top.png";
+		std::string bottomPath = "data/textures/cubemap/bottom.png";
+		std::string frontPath = "data/textures/cubemap/front.png";
+		std::string backPath = "data/textures/cubemap/back.png";
+		NarwhalCubemap cubemapImage(narwhalDevice, 1024, 1024, rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
 		//Make other Images
 
 
-		VkExtent2D swapChainExtent = narwhalWindow.getExtent();
 
 		for (int i = 0; i < NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
 
 			parameterBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(BlackHoleComputeData),1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			uboBuffers[i] = std::make_unique<NarwhalBuffer>(narwhalDevice, sizeof(GlobalUbo),1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-			storageColorImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
-			storagePositionImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
-			storageDirectionImages[i] = std::make_unique<NarwhalStorageImage>(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
-			if (i == 0) {
-				std::string rightPath = "data/textures/cubemap/right.png";
-				std::string leftPath = "data/textures/cubemap/left.png";
-				std::string topPath = "data/textures/cubemap/top.png";
-				std::string bottomPath = "data/textures/cubemap/bottom.png";
-				std::string frontPath = "data/textures/cubemap/front.png";
-				std::string backPath = "data/textures/cubemap/back.png";
-				cubemapImages[i] = std::make_unique<NarwhalCubemap>(narwhalDevice,1024,1024,rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
-			}
 
 			parameterBuffers[i]->map();
 			uboBuffers[i]->map();
 			
 		}
-
+		
 		auto computeSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT) // Parameters
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Color Image
@@ -116,6 +116,8 @@ namespace narwhal {
 			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Background Cube map Image
 			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Temp Image
 			.build();
+
+		
 
 		auto renderSetLayout = NarwhalDescriptorSetLayout::Builder(narwhalDevice)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS) // Global UBO
@@ -129,10 +131,10 @@ namespace narwhal {
 
 		for (int i = 0; i < computeDescriptorSets.size(); i++) {
 			auto paramBufferInfo = parameterBuffers[i]->descriptorInfo();
-			auto colorImageInfo = storageColorImages[i]->getDescriptorImageInfo();
-			auto positionImageInfo = storagePositionImages[i]->getDescriptorImageInfo();
-			auto directionImageInfo = storageDirectionImages[i]->getDescriptorImageInfo();
-			auto backgroundCubeMapInfo = cubemapImages[0]->getDescriptorImageInfo();
+			auto colorImageInfo = storageColorImage.getDescriptorImageInfo();
+			auto positionImageInfo = storagePositionImage.getDescriptorImageInfo();
+			auto directionImageInfo = storageDirectionImage.getDescriptorImageInfo();
+			auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
 				.writeBuffer(0, &paramBufferInfo)
@@ -145,7 +147,7 @@ namespace narwhal {
 
 		for (int i = 0;  i < renderDescriptorSets.size();i++){
 			auto uboBufferInfo = uboBuffers[i]->descriptorInfo();
-			auto colorImageInfo = storageColorImages[i]->getDescriptorImageInfo();
+			auto colorImageInfo = storageColorImage.getDescriptorImageInfo();
 
 			NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
 				.writeBuffer(0, &uboBufferInfo)
@@ -182,8 +184,30 @@ namespace narwhal {
 
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
-				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,renderDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],fence };  //TODO: Check if need to replace delta time by accumulated time
 				
+				//Update compute descriptor sets
+				
+
+				//Update computeDescriptorSets 0 with blackHoleParameters
+				parameterBuffers[frameIndex]->writeToBuffer(&blackHoleParameters, sizeof(BlackHoleParameters));
+				
+				auto paramBufferInfo = parameterBuffers[frameIndex]->descriptorInfo();
+				auto colorImageInfo = storageColorImage.getDescriptorImageInfo();
+				auto positionImageInfo = storagePositionImage.getDescriptorImageInfo();
+				auto directionImageInfo = storageDirectionImage.getDescriptorImageInfo();
+				auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
+
+				NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
+					.writeBuffer(0, &paramBufferInfo)
+					.writeImage(1, &colorImageInfo)
+					.writeImage(2, &positionImageInfo)
+					.writeImage(3, &directionImageInfo)
+					.writeImage(4, &backgroundCubeMapInfo)
+					.overwrite(computeDescriptorSets[frameIndex]);
+
+
+				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,renderDescriptorSets[frameIndex],computeDescriptorSets[frameIndex],fence };  //TODO: Check if need to replace delta time by accumulated time
+
 				blackHoleComputeSystem.render(frameInfo, blackHoleParameters, newSize);
 
 				

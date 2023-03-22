@@ -25,6 +25,9 @@ namespace narwhal {
 		BlackHoleApp();
 		~BlackHoleApp();
 
+		void updateComputeDescriptors(int frameNum, NarwhalDescriptorSetLayout& setLayout);
+		void updateRenderDescriptors(int frameNum, NarwhalDescriptorSetLayout& setLayout);
+
 		BlackHoleApp(const BlackHoleApp&) = delete;
 		BlackHoleApp& operator=(const BlackHoleApp&) = delete;
 

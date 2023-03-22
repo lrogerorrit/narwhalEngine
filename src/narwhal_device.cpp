@@ -17,7 +17,7 @@ namespace narwhal {
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData) {
 		
-		std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl;
+		std::cerr << "Validation layer: " << pCallbackData->pMessage << std::endl<<std::endl;
 
 		return VK_FALSE;
 	}
@@ -609,6 +609,24 @@ namespace narwhal {
 
 			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT; //The latest stage where we will access this will be when the fragment shader reads the data
+		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_GENERAL) {
+			barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+			barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT| VK_ACCESS_MEMORY_WRITE_BIT;	
+
+			sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+			destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+
+		}
+		else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_GENERAL) {
+			barrier.srcAccessMask = 0;
+			barrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT| VK_ACCESS_MEMORY_WRITE_BIT;	
+
+			sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			destinationStage = VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT | VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
+
+
 		}
 		else {
 			throw std::invalid_argument("unsupported layout transition!");

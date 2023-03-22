@@ -26,7 +26,7 @@ namespace narwhal {
 		imageCreateInfo.arrayLayers = 1;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT; // TODO: Maybe remove sampled bit?
+		imageCreateInfo.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT|VK_IMAGE_USAGE_TRANSFER_DST_BIT; // TODO: Maybe remove sampled bit?
 		imageCreateInfo.initialLayout= VK_IMAGE_LAYOUT_UNDEFINED;
 
 		if (vkCreateImage(narwhalDevice.device(), &imageCreateInfo, nullptr, &image) != VK_SUCCESS) {
@@ -48,10 +48,16 @@ namespace narwhal {
 			throw std::runtime_error("Failed to allocate texture image memory with name" + name);
 		}
 
+		// We now prepare the image for copying by transitioning it to the VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL layout.
+		//narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
 		// Bind the memory to the image
 		if (vkBindImageMemory(narwhalDevice.device(), image, imageMemory, 0) != VK_SUCCESS) {
 			throw std::runtime_error("Failed to bind texture image memory with name" + name);
 		}
+
+		//We then transition the image to the VK_IMAGE_LAYOUT_GENERAL
+		narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
 
 	}

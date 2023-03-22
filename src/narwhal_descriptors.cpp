@@ -172,6 +172,7 @@ namespace narwhal {
         write.dstBinding = binding;
         write.pImageInfo = imageInfo;
         write.descriptorCount = 1;
+        //write.dstSet = VK_NULL_HANDLE;
 
         writes.push_back(write);
         return *this;
