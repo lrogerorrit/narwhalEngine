@@ -63,9 +63,15 @@ layout (binding = 0) uniform parameters{
 layout(local_size_x = xSize, local_size_y = ySize, local_size_z = 1) in;
 
 
-layout(binding=1,rgba8) uniform writeonly image2D colorOutput;
+layout(binding=1,rgba8) uniform  image2D colorOutput;
 layout(binding=2, rgba8) uniform image2D posOutput;
 layout(binding=3,rgba8) uniform image2D dirOutput;
+layout(binding=4) uniform samplerCube background;
+layout(binding=5) uniform sampler2D blackbody;
+layout(binding = 6, r8) uniform image2D isComplete;
+
+
+
 
 
 float falloffRate= bhParams.params.innerFalloffRate;
@@ -360,7 +366,8 @@ vec4 GetDiskColor(vec3 x, vec3 xLast, float t)
     // Sample blackbody texture
     uv.x = (shift - 0.5) / (2.0 - 0.5);
     uv.y = (T - 1000.0) / (10000.0 - 1000.0);
-    vec3 bbColor;// = _BlackbodyTexture.SampleLevel(sampler_BlackbodyTexture, uv, 0);
+    vec3 bbColor= texture(blackbody,uv).rgb;// = _BlackbodyTexture.SampleLevel(sampler_BlackbodyTexture, uv, 0);
+    //TODO: Check output of bbColor
 
     // Weight by noise strength and multiplier
     vec4 outColor = texColor.xxxx * vec4(bbColor.xyz, 1.0);
@@ -390,20 +397,21 @@ bool checkWindowBound(vec2 pos)
 void main()
 {
     ivec2 id= ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
-    vec4 outputColor;
+    // Break if already failed bounds check
+    if (imageLoad(isComplete,id) == 1) { return; }
+
+    vec4 outputColor= imageLoad(colorOutput,id);
+    bool colorChanged=false;
+    /*
     // Check if id is within window bounds
     if (!checkWindowBound(id.xy))
 	{
 		return;
 	}
+    */
 
-// Break if already failed bounds check
-   // if (isComplete[id.xy] == 1) { return; }
 
     // Propagate ray
-    
-    
-    
     vec3 x =  imageLoad(posOutput,id).xyz;
     float t= imageLoad(posOutput,id).w;
     vec3 u = imageLoad(dirOutput,id).xyz;
@@ -422,6 +430,7 @@ void main()
     {
         // Save color from accretion disk noise function
         outputColor = Blend(outputColor, GetDiskColor(x, xLast, t));
+        colorChanged=true;
     }
 
     // Check for horizon condition
@@ -431,7 +440,9 @@ void main()
         outputColor = Blend(outputColor, vec4(0.0, 0.0, 0.0, 1.0));
 
         // Set complete flag
-        //isComplete[id.xy] = 1;
+        imageStore(isComplete,id,vec4(1,0,0,0)); //Even though its a vec4, image is only r8 so we only use the first component
+        colorChanged=true;
+        
     }
 
     // Check for escape condition
@@ -440,22 +451,23 @@ void main()
         // Evaluate skybox texture
         vec3 outRay = ToCartesianScalar(x.xyz).xyz;
         outRay.z *= -1.0;
-        vec4 skyboxColor;// = _SkyboxTexture.SampleLevel(sampler_SkyboxTexture, outRay, 0);
+        vec4 skyboxColor= texture(background,outRay);// = _SkyboxTexture.SampleLevel(sampler_SkyboxTexture, outRay, 0);
         skyboxColor *= vec4(bhParams.params.starMultiplier.xxx, 1.0);
 
         // Blend with previous color value
         outputColor = Blend(outputColor, skyboxColor);
 
         // Set complete flag
-        //isComplete[id.xy] = 1;
+        imageStore(isComplete,id,vec4(1,0,0,0)); //Even though its a vec4, image is only r8 so we only use the first component
+        colorChanged=true;
     }
 
     // Write back color
-    //imageStore(colorOutput,id,outputColor);
+    if (colorChanged){
+        imageStore(colorOutput,id,outputColor);
+    }
+    
+   
 
-    //Debug img Test
-    float randR = Random(vec3(id.x+id.y+bhParams.time, 0.0, 0.0));
-    float randG = Random(vec3(0.0, id.x+id.y+bhParams.time, 0.0));
-    float randB = Random(vec3(0.0, id.x+id.y+bhParams.time, id.x+id.y+bhParams.time));
-    imageStore(colorOutput,id,vec4(randR,randG,randB,1.0));
+
 }
