@@ -48,6 +48,7 @@ namespace narwhal {
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*5)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT * POOL_SETS_COUNT)
 			.build();
 
@@ -97,9 +98,9 @@ namespace narwhal {
 		std::string bottomPath = "data/textures/cubemap/bottom.png";
 		std::string frontPath = "data/textures/cubemap/front.png";
 		std::string backPath = "data/textures/cubemap/back.png";
+		NarwhalImage tempImage(narwhalDevice, "data/textures/blackbody.png");
 		NarwhalCubemap cubemapImage(narwhalDevice, 1024, 1024, rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
 		//Make other Images
-		NarwhalImage tempImage(narwhalDevice, "data/textures/blackbody.png");
 
 
 		for (int i = 0; i < NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
@@ -117,9 +118,9 @@ namespace narwhal {
 			.addBinding(1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Color Image
 			.addBinding(2, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Position Image
 			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Direction Image
-			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Background Cube map Image
-			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Temp Image
-			.addBinding(6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // isComplete Image
+			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Temp Image
+			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // isComplete Image
+			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT) // Background Cube map Image
 			.build();
 
 		
@@ -149,9 +150,9 @@ namespace narwhal {
 				.writeImage(1, &colorImageInfo)
 				.writeImage(2, &positionImageInfo)
 				.writeImage(3, &directionImageInfo)
-				.writeImage(4, &backgroundCubeMapInfo)
-				.writeImage(5, &tempImageInfo)
-				.writeImage(6,&completeImageInfo)
+				.writeImage(4, &tempImageInfo)
+				.writeImage(5,&completeImageInfo)
+				.writeImage(6, &backgroundCubeMapInfo)
 				.build(computeDescriptorSets[i]);
 		}
 
@@ -223,9 +224,9 @@ namespace narwhal {
 					.writeImage(1, &colorImageInfo)
 					.writeImage(2, &positionImageInfo)
 					.writeImage(3, &directionImageInfo)
-					.writeImage(4, &backgroundCubeMapInfo)
-					.writeImage(5, &tempImageInfo)
-					.writeImage(6, &completeImageInfo)
+					.writeImage(4, &tempImageInfo)
+					.writeImage(5, &completeImageInfo)
+					.writeImage(6, &backgroundCubeMapInfo)
 					.overwrite(computeDescriptorSets[frameIndex]);
 
 

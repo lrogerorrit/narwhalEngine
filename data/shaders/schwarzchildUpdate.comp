@@ -66,9 +66,9 @@ layout(local_size_x = xSize, local_size_y = ySize, local_size_z = 1) in;
 layout(binding=1,rgba8) uniform  image2D colorOutput;
 layout(binding=2, rgba8) uniform image2D posOutput;
 layout(binding=3,rgba8) uniform image2D dirOutput;
-//layout(binding=4) uniform samplerCube background;
-layout(binding=5,rgba8) uniform image2D blackbody;
-layout(binding = 6, r8ui) uniform uimage2D isComplete;
+layout(binding=4,rgba8) uniform image2D blackbody;
+layout(binding = 5, r8ui) uniform uimage2D isComplete;
+layout(binding=6) uniform samplerCube background;
 
 
 
@@ -451,7 +451,7 @@ void main()
         // Evaluate skybox texture
         vec3 outRay = ToCartesianScalar(x.xyz).xyz;
         outRay.z *= -1.0;
-        vec4 skyboxColor;//= texture(background,outRay);// = _SkyboxTexture.SampleLevel(sampler_SkyboxTexture, outRay, 0);
+        vec4 skyboxColor= texture(background,outRay);// = _SkyboxTexture.SampleLevel(sampler_SkyboxTexture, outRay, 0);
         skyboxColor *= vec4(bhParams.params.starMultiplier.xxx, 1.0);
 
         // Blend with previous color value
