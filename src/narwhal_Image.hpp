@@ -1,57 +1,40 @@
 #pragma once
-
 #include "narwhal_device.hpp"
-#include "narwhal_buffer.hpp"
 
-#include <vulkan/vulkan_core.h>
+#include <vulkan/vulkan.hpp>
 
 //std
 #include <string>
 
 
-
 namespace narwhal {
-	
-
 	class NarwhalImage
 	{
 	public:
-		
-		NarwhalImage(NarwhalDevice& device,std::string name);
+		NarwhalImage(NarwhalDevice& device, std::string path, VkFormat imageFormat= VK_FORMAT_R8G8B8A8_SRGB);
 		~NarwhalImage();
-		
-		void loadImage(const std::string& filename);
 
-		static VkSampler* textureSampler;
-		static void createTextureSampler(NarwhalDevice& device);
-		static VkSampler getTextureSampler() { return *textureSampler; };
-		
-		static std::vector<NarwhalImage*> loadedImages;
-		static bool imageExist(std::string fileName);
-		//getter for narwhalImage with given name
-		static NarwhalImage* getImage(std::string name);
-		
-		VkImageView getImageView() { return imageView; };
+		void createImage();
+		void createImageView();
+		void createSampler();
+
+		VkDescriptorImageInfo getDescriptorImageInfo();
 	private:
-		std::string name;
-
-		void createTexureImage(const std::string& filename);
-		void createTextureImageView();
-		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties);
 		
-		VkImageView createImageView(VkFormat format);
+		
+		void destroy();
+		std::string path;
 
 		NarwhalDevice& narwhalDevice;
 
-		int textureWidth, textureHeight, textureChannels;
-		VkDeviceSize imageSize;
-		
-		VkImage image= nullptr;
-		VkImageView imageView = nullptr;
-		VkDeviceMemory imageMemory=nullptr;
+		uint32_t width, height;
 
-		
-	
+		VkFormat imageFormat;
+
+		VkImage image = nullptr;
+		VkImageView imageView = nullptr;
+		VkDeviceMemory imageMemory = nullptr;
+		VkSampler sampler = nullptr;
 	};
 }
 

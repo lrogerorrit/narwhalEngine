@@ -2,7 +2,7 @@
 
 
 namespace narwhal {
-	NarwhalStorageImage::NarwhalStorageImage(NarwhalDevice& device, uint32_t width, uint32_t height, std::string name):narwhalDevice(device), name(name), width(width), height(height)
+	NarwhalStorageImage::NarwhalStorageImage(NarwhalDevice& device, uint32_t width, uint32_t height, VkFormat imageFormat, std::string name):narwhalDevice(device), name(name), width(width), height(height),imageFormat(imageFormat)
 	{
 		createStorageImage(width, height);
 		createImageView();
@@ -18,7 +18,7 @@ namespace narwhal {
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.format= VK_FORMAT_R8G8B8A8_UNORM; // TODO: Maybe change in the future so hdr?
+		imageCreateInfo.format= imageFormat; // TODO: Maybe change in the future so hdr?
 		imageCreateInfo.extent.width = width;
 		imageCreateInfo.extent.height = height;
 		imageCreateInfo.extent.depth = 1;
@@ -30,7 +30,7 @@ namespace narwhal {
 		imageCreateInfo.initialLayout= VK_IMAGE_LAYOUT_UNDEFINED;
 
 		if (vkCreateImage(narwhalDevice.device(), &imageCreateInfo, nullptr, &image) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to create texture image with name" + name); 
+			throw std::runtime_error("Failed to create storage image with name" + name); 
 		}
 
 		// Get the memory requirements for the image
@@ -45,19 +45,19 @@ namespace narwhal {
 		memoryAllocateInfo.memoryTypeIndex = narwhalDevice.findMemoryType(memoryRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		if (vkAllocateMemory(narwhalDevice.device(), &memoryAllocateInfo, nullptr, &imageMemory) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to allocate texture image memory with name" + name);
+			throw std::runtime_error("Failed to allocate storage image memory with name" + name);
 		}
 
 		// We now prepare the image for copying by transitioning it to the VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL layout.
-		//narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		//narwhalDevice.transitionImageLayout(image, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		// Bind the memory to the image
 		if (vkBindImageMemory(narwhalDevice.device(), image, imageMemory, 0) != VK_SUCCESS) {
-			throw std::runtime_error("Failed to bind texture image memory with name" + name);
+			throw std::runtime_error("Failed to bind storage image memory with name" + name);
 		}
 
 		//We then transition the image to the VK_IMAGE_LAYOUT_GENERAL
-		narwhalDevice.transitionImageLayout(image, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+		narwhalDevice.transitionImageLayout(image, imageFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
 
 	}
@@ -67,7 +67,7 @@ namespace narwhal {
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.image = image;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		imageViewCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM; //TODO: Maybe change in the future so hdr?
+		imageViewCreateInfo.format = imageFormat; //TODO: Maybe change in the future so hdr?
 		imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.levelCount = 1;
@@ -75,7 +75,7 @@ namespace narwhal {
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
 
 		if (vkCreateImageView(narwhalDevice.device(), &imageViewCreateInfo, nullptr, &imageView) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create texture image view!");
+			throw std::runtime_error("failed to create storage image view!");
 		}
 	}
 	void NarwhalStorageImage::resize(uint32_t width, uint32_t height)

@@ -42,16 +42,11 @@ namespace narwhal {
 	};
 
 	BlackHoleApp::BlackHoleApp() {
-		const int POOL_SETS_COUNT = 8;
+		const int POOL_SETS_COUNT = 9;
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*5)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT * POOL_SETS_COUNT)
 			.build();
 
@@ -92,6 +87,7 @@ namespace narwhal {
 		NarwhalStorageImage storageColorImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 		NarwhalStorageImage storagePositionImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 		NarwhalStorageImage storageDirectionImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
+		NarwhalStorageImage storageCompleteImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height, VK_FORMAT_R8_UINT);
 
 		//Make Cubemap Images
 		std::string rightPath = "data/textures/cubemap/right.png";
@@ -122,6 +118,7 @@ namespace narwhal {
 			.addBinding(3, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Direction Image
 			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Background Cube map Image
 			.addBinding(5, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Temp Image
+			.addBinding(6, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // isComplete Image
 			.build();
 
 		
@@ -142,6 +139,8 @@ namespace narwhal {
 			auto positionImageInfo = storagePositionImage.getDescriptorImageInfo();
 			auto directionImageInfo = storageDirectionImage.getDescriptorImageInfo();
 			auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
+			auto completeImageInfo = storageCompleteImage.getDescriptorImageInfo();
+
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
 				.writeBuffer(0, &paramBufferInfo)
@@ -149,6 +148,8 @@ namespace narwhal {
 				.writeImage(2, &positionImageInfo)
 				.writeImage(3, &directionImageInfo)
 				.writeImage(4, &backgroundCubeMapInfo)
+				//.writeImage(5, &tempImageInfo) //TODO
+				.writeImage(6,&completeImageInfo)
 				.build(computeDescriptorSets[i]);
 		}
 
