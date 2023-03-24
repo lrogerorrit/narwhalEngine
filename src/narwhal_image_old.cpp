@@ -1,6 +1,6 @@
 #include "narwhal_image_old.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
+//#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 //Std

@@ -115,7 +115,7 @@
     <ClCompile Include="..\..\src\systems\narwhal_imgui.cpp">
       <Filter>systems</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\narwhal_image.cpp">
+    <ClCompile Include="..\..\src\narwhal_image_old.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\systems\compute_shader_test.cpp">
@@ -135,6 +135,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\systems\quad_render_system.cpp">
       <Filter>systems</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\narwhal_image.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -213,7 +216,7 @@
     <ClInclude Include="..\..\src\systems\narwhal_imgui.hpp">
       <Filter>systems</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\narwhal_image.hpp">
+    <ClInclude Include="..\..\src\narwhal_image_old.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\systems\compute_shader_test.hpp">
@@ -233,6 +236,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\systems\quad_render_system.hpp">
       <Filter>systems</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\narwhal_image.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -345,6 +351,33 @@
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\compute</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\fragment</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
+      <Filter>shaders\vertex</Filter>
     </CustomBuild>
     <CustomBuild Include="..\..\data\shaders\*.frag;..\..\data\shaders\*.vert;..\..\data\shaders\*.comp">
       <Filter>shaders\vertex</Filter>

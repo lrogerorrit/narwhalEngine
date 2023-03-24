@@ -5,6 +5,7 @@
 #include "narwhal_storage_image.hpp"
 #include "narwhal_cubemap.hpp"
 #include "narwhal_model.hpp"
+#include "narwhal_image.hpp"
 
 #include "systems/narwhal_imgui.hpp"
 #include "systems/black_hole_compute_system.hpp"
@@ -98,7 +99,7 @@ namespace narwhal {
 		std::string backPath = "data/textures/cubemap/back.png";
 		NarwhalCubemap cubemapImage(narwhalDevice, 1024, 1024, rightPath, leftPath, topPath, bottomPath, frontPath, backPath);
 		//Make other Images
-
+		NarwhalImage tempImage(narwhalDevice, "data/textures/blackbody.png");
 
 
 		for (int i = 0; i < NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT; i++) {
@@ -140,6 +141,7 @@ namespace narwhal {
 			auto directionImageInfo = storageDirectionImage.getDescriptorImageInfo();
 			auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
 			auto completeImageInfo = storageCompleteImage.getDescriptorImageInfo();
+			auto tempImageInfo = tempImage.getDescriptorImageInfo();
 
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
@@ -148,7 +150,7 @@ namespace narwhal {
 				.writeImage(2, &positionImageInfo)
 				.writeImage(3, &directionImageInfo)
 				.writeImage(4, &backgroundCubeMapInfo)
-				//.writeImage(5, &tempImageInfo) //TODO
+				.writeImage(5, &tempImageInfo)
 				.writeImage(6,&completeImageInfo)
 				.build(computeDescriptorSets[i]);
 		}
@@ -212,6 +214,9 @@ namespace narwhal {
 				auto positionImageInfo = storagePositionImage.getDescriptorImageInfo();
 				auto directionImageInfo = storageDirectionImage.getDescriptorImageInfo();
 				auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
+				auto completeImageInfo = storageCompleteImage.getDescriptorImageInfo();
+				auto tempImageInfo = tempImage.getDescriptorImageInfo();
+
 
 				NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
 					.writeBuffer(0, &paramBufferInfo)
@@ -219,6 +224,8 @@ namespace narwhal {
 					.writeImage(2, &positionImageInfo)
 					.writeImage(3, &directionImageInfo)
 					.writeImage(4, &backgroundCubeMapInfo)
+					.writeImage(5, &tempImageInfo)
+					.writeImage(6, &completeImageInfo)
 					.overwrite(computeDescriptorSets[frameIndex]);
 
 

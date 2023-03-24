@@ -40,9 +40,8 @@ namespace narwhal {
 		// Create Textures
 		auto textureOffset = static_cast<uint32_t>(builder.textureNames.size());
 		for (auto name : builder.textureNames) {
-			NarwhalImage texture{ narwhalDevice, name };
 			std::string path = "data/textures/" + name;
-			texture.loadImage(path);
+			NarwhalImage texture{ narwhalDevice, path };
 			textures.push_back(texture);
 		}
 
