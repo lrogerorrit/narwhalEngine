@@ -53,16 +53,14 @@ struct BlackHoleParameters{
 };
 
 
+layout(local_size_x = xSize, local_size_y = ySize, local_size_z = 1) in;
+
 layout (binding = 0) uniform parameters{
 	BlackHoleParameters params;
     float time;
     bool hardCheck;
-    vec2 windowSize;
+    ivec2 windowSize;
 }bhParams;
-
-layout(local_size_x = xSize, local_size_y = ySize, local_size_z = 1) in;
-
-
 layout(binding=1,rgba8) uniform  image2D colorOutput;
 layout(binding=2, rgba8) uniform image2D posOutput;
 layout(binding=3,rgba8) uniform image2D dirOutput;
@@ -388,7 +386,7 @@ vec4 Blend(vec4 foreColor, vec4 backColor)
     return outColor;
 }
 
-bool checkWindowBound(vec2 pos)
+bool checkWindowBound(ivec2 pos)
 {
 	return (pos.x >= 0 && pos.x < bhParams.windowSize.x && pos.y >= 0 && pos.y < bhParams.windowSize.y);
 }
@@ -397,18 +395,21 @@ bool checkWindowBound(vec2 pos)
 void main()
 {
     ivec2 id= ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
-    // Break if already failed bounds check
-    if (imageLoad(isComplete,id).r == 1) { return; }
 
-    vec4 outputColor= imageLoad(colorOutput,id);
-    bool colorChanged=false;
-    /*
     // Check if id is within window bounds
     if (!checkWindowBound(id.xy))
 	{
 		return;
 	}
-    */
+    
+
+    // Break if already failed bounds check
+    if (imageLoad(isComplete,id).r == 1) { return; }
+
+    vec4 outputColor= imageLoad(colorOutput,id);
+    bool colorChanged=false;
+    
+   
 
 
     // Propagate ray
