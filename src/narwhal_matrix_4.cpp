@@ -1,6 +1,10 @@
+//Credit to Javi Agenjo for the original code
 #include "narwhal_matrix_4.hpp"
-#define M_PI_2 1.57079632679489661923
 
+#include <algorithm>    // std::swap
+#include <glm/gtc/type_ptr.hpp>
+
+#define M_PI_2 1.57079632679489661923
 
 namespace narwhal {
 	const Matrix44 Matrix44::IDENTITY;
@@ -13,6 +17,12 @@ namespace narwhal {
 	Matrix44::Matrix44(const float* v)
 	{
 		memcpy((void*)m, (void*)v, sizeof(float) * 16);
+	}
+
+	Matrix44::Matrix44(glm::mat4& mat)
+	{
+		const float* matSource = (const float*)glm::value_ptr(mat);
+		memcpy((void*)m, (void*)matSource, sizeof(float) * 16);
 	}
 
 	void Matrix44::clear()

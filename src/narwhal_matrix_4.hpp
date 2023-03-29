@@ -1,5 +1,5 @@
-#pragma once
 //Credit to Javi Agenjo for the original code
+#pragma once
 
 #include <glm/glm.hpp>
 
@@ -28,6 +28,7 @@ namespace narwhal {
 
 		Matrix44();
 		Matrix44(const float* v);
+		Matrix44(glm::mat4& m);
 
 		void clear();
 		void setIdentity();
