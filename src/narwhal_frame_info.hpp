@@ -61,7 +61,7 @@ namespace narwhal {
 		BlackHoleType blackHoleType = BlackHoleType::Schwarzchild;
 
 		//Step Size Params
-		float timeStep= 0.001f;
+		float timeStep= 0.01f;
 		float poleMargin = .01f;
 		float poleStep = .0001f;
 		float escapeDistance = 10000.f;
@@ -104,7 +104,8 @@ namespace narwhal {
 		BlackHoleParameters params;
 		float time = 0;
 		bool hardCheck = false;
-		glm::vec2 windowSize{0};
+		glm::ivec2 windowSize{0};
+		
 
 	};
 
@@ -120,5 +121,21 @@ namespace narwhal {
 		int frameIndex;
 		VkCommandBuffer commandBuffer;
 		VkDescriptorSet renderDescriptorSet;
+	};
+
+	struct InitFrameInfo {
+		int frameIndex;
+		VkCommandBuffer commandBuffer;
+		VkDescriptorSet initDescriptorSet;
+		VkFence computeFence;
+	};
+
+	struct InitParameters {
+		glm::ivec2 windowSize;
+		alignas(16) glm::mat4 camToWorld;
+		alignas(16) glm::mat4 camInverseProj;
+		alignas(16)glm::vec3 camPosCartesian;
+		alignas(16)glm::vec3 camPosSpherical;
+		float horizonRadius;
 	};
 }
