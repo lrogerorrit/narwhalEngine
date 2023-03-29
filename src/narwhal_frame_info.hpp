@@ -2,6 +2,7 @@
 
 #include "narwhal_camera.hpp"
 #include "narwhal_game_object.hpp"
+#include "narwhal_matrix_4.hpp"
 
 
 // lib
@@ -132,8 +133,10 @@ namespace narwhal {
 
 	struct InitParameters {
 		glm::ivec2 windowSize;
-		alignas(16) glm::mat4 camToWorld;
-		alignas(16) glm::mat4 camInverseProj;
+		alignas(16) Matrix44 camToWorld;
+		//alignas(16) glm::mat4 camToWorld;
+		alignas(16) Matrix44 camInverseProj;
+		//alignas(16) glm::mat4 camInverseProj;
 		alignas(16)glm::vec3 camPosCartesian;
 		alignas(16)glm::vec3 camPosSpherical;
 		float horizonRadius;
