@@ -176,12 +176,14 @@ call compile.bat</Command>
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\narwhal_buffer.cpp" />
     <ClCompile Include="..\..\src\narwhal_camera.cpp" />
+    <ClCompile Include="..\..\src\narwhal_cameraV2.cpp" />
     <ClCompile Include="..\..\src\narwhal_cubemap.cpp" />
     <ClCompile Include="..\..\src\narwhal_descriptors.cpp" />
     <ClCompile Include="..\..\src\narwhal_device.cpp" />
     <ClCompile Include="..\..\src\narwhal_game_object.cpp" />
     <ClCompile Include="..\..\src\narwhal_image.cpp" />
     <ClCompile Include="..\..\src\narwhal_image_old.cpp" />
+    <ClCompile Include="..\..\src\narwhal_matrix_4.cpp" />
     <ClCompile Include="..\..\src\narwhal_model.cpp" />
     <ClCompile Include="..\..\src\narwhal_pipeline.cpp" />
     <ClCompile Include="..\..\src\narwhal_renderer.cpp" />
@@ -211,6 +213,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\keyboard_movement_controller.hpp" />
     <ClInclude Include="..\..\src\narwhal_buffer.hpp" />
     <ClInclude Include="..\..\src\narwhal_camera.hpp" />
+    <ClInclude Include="..\..\src\narwhal_cameraV2.hpp" />
     <ClInclude Include="..\..\src\narwhal_cubemap.hpp" />
     <ClInclude Include="..\..\src\narwhal_descriptors.hpp" />
     <ClInclude Include="..\..\src\narwhal_device.hpp" />
@@ -218,6 +221,7 @@ call compile.bat</Command>
     <ClInclude Include="..\..\src\narwhal_game_object.hpp" />
     <ClInclude Include="..\..\src\narwhal_image.hpp" />
     <ClInclude Include="..\..\src\narwhal_image_old.hpp" />
+    <ClInclude Include="..\..\src\narwhal_matrix_4.hpp" />
     <ClInclude Include="..\..\src\narwhal_model.hpp" />
     <ClInclude Include="..\..\src\narwhal_pipeline.hpp" />
     <ClInclude Include="..\..\src\narwhal_renderer.hpp" />
