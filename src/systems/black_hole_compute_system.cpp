@@ -8,8 +8,8 @@
 #include <iostream>
 
 
-#define COMP_LOCAL_X 8
-#define COMP_LOCAL_Y 8
+constexpr auto COMP_LOCAL_X = 8.0f;
+constexpr auto COMP_LOCAL_Y = 8.0f;
 
 namespace narwhal {
 	BlackHoleComputeSystem::BlackHoleComputeSystem(NarwhalDevice& device, VkRenderPass renderPass, VkDescriptorSetLayout setLayout): narwhalDevice{device}
