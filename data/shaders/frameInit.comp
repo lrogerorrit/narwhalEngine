@@ -2,7 +2,7 @@
 
 // Constants
 
-const float PI = 3.14159265f;
+const float PI = 3.1415926535897932384626433832795028841971693993751058209749;
 const int xSize= 8;
 const int ySize= 8;
 
@@ -10,8 +10,8 @@ layout(local_size_x = xSize, local_size_y = ySize, local_size_z = 1) in;
 
 layout(binding=0) uniform parameters{
     ivec2 windowSize;
-    mat4 camToWorld;
-    mat4 camInverseProj;
+    mat4x4 camToWorld;
+    mat4x4 camInverseProj;
     vec3 camPosCartesian;
     vec3 camPosSpherical;
     float horizonRadius;
@@ -22,14 +22,17 @@ layout(binding=3,rgba8) uniform image2D  dirOutput;
 layout(binding = 4, r8ui) uniform uimage2D isComplete;
 
 
+
+
 // Cartesian to spherical coordinate conversion
 vec3 ToSphericalScalar(vec3 cart)
 {
-	float r = length(cart);
-	float rxz= length(cart.xz);
-	float theta = atan(rxz, cart.y);
-	float phi = atan(cart.z, cart.x);
-return vec3(r, theta, phi);
+    float r = length(cart);
+    float rxz = length(cart.xz);
+    float theta = atan(rxz, cart.y);
+    float phi = atan(cart.z, cart.x);
+
+    return vec3(r, theta, phi);
 }
 
 // Cartesian to Spherical vector conversion (inputs in cartesian)
@@ -37,7 +40,7 @@ vec3 ToSphericalVector(vec3 origin, vec3 dir)
 {
 	float r= length(origin);
 	float rxz= length(origin.xz);
-	mat3 L = mat3(
+	mat3x3 L = mat3x3(
         origin.x / r,                        // dr/dx
         origin.y / r,                        // dr/dy
         origin.z / r,                        // dr/dz
@@ -48,8 +51,10 @@ vec3 ToSphericalVector(vec3 origin, vec3 dir)
         0.0,                                 // dphi/dy
         origin.x / rxz                       // dphi/dz
     );
-     return L*dir;
+     return dir*L;
 }
+
+
 
 // Spherical to Cartesian coordinate conversion
 vec3 ToCartesianScalar(vec3 sph)
@@ -64,7 +69,7 @@ vec3 ToCartesianScalar(vec3 sph)
 // Spherical to Cartesian vector conversion (inputs in spherical)
 vec3 ToCartesianVector(vec3 origin, vec3 dir)
 {
-    mat3 L = mat3(
+    mat3x3 L = mat3x3(
         sin(origin.y) * cos(origin.z),              // dx/dr
         origin.x * cos(origin.y) * cos(origin.z),   // dx/dtheta
         -origin.x * sin(origin.y) * sin(origin.z),  // dx/dphi
@@ -76,17 +81,37 @@ vec3 ToCartesianVector(vec3 origin, vec3 dir)
         origin.x* sin(origin.y)* cos(origin.z)      // dy/dphi
     );
 
-    return L*dir;
+    return dir*L;
 }
+
+vec3 cartesian_to_spherical(vec3 origin, vec3 dir) {
+  vec3 v = dir - origin;
+  float r = length(v);
+  float theta = acos(v.z / r);
+  float phi = atan(v.y, v.x);
+  return vec3(r, theta, phi);
+}
+
 
 bool checkWindowBound(ivec2 pos)
 {
 	return (pos.x >= 0 && pos.x < initParams.windowSize.x && pos.y >= 0 && pos.y < initParams.windowSize.y);
 }
+vec3 gamma(vec3 c)
+{
+	return pow(c,vec3(1.0/2.2));
+}
+
+vec3 degamma(vec3 c)
+{
+	return pow(c,vec3(2.2));
+}
+
 
 
 void main(){
     ivec2 id= ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
+    
 
     if (!checkWindowBound(id.xy))
 	{
@@ -96,26 +121,38 @@ void main(){
     uint width,height;
     width= initParams.windowSize.x;
     height= initParams.windowSize.y;
+    vec2 screenSize=imageSize(colorOutput);
+    float _width= screenSize.x;
+    float _height= screenSize.y;
 
-    vec2 uv= vec2((id.xy+vec2(.5,.5))/vec2(width,height)*2.0f-1.0f);
+    //Transform pixel to [-1,1] range
+     vec2 uv= vec2(id.x/_width, id.y/_height);
+     uv= uv*2.0-1.0;
+    
+    //We now get the screen position
+    vec4 screenPos= vec4(uv.xy,0.0,1.0);
+    vec4 projWorldPos= screenPos*initParams.camInverseProj;
+    
 
-    vec3 direction= (initParams.camInverseProj*vec4(uv,0.0f,1.0f)).xyz;
+    //We now get the world_position;
+    vec3 worldPos= projWorldPos.xyz/projWorldPos.w;
+
+    vec3 direction= (vec4(worldPos.xyz,0)* initParams.camToWorld).xyz;
+
     direction= normalize(direction);
 
-     // Transform from cartesian space to spherical space
-    vec3 originSph    = initParams.camPosSpherical;
-    vec3 directionSph = ToSphericalVector(initParams.camPosCartesian, direction);
+    vec3 originSph= initParams.camPosSpherical;
+    vec3 directionSph= ToSphericalVector(initParams.camPosCartesian,direction);
 
-     // Lower indices of velocity
-    directionSph.x *= (1.0 - (initParams.horizonRadius / originSph.x));
-    directionSph.y *= originSph.x * originSph.x;
-    // NOTE: By all means the following value should be squared. 
-    // For the life of me, I can not yet figure out why
-    directionSph.z *= originSph.x * sin(originSph.y);
+    //We now lower the indices of velocity
+    directionSph.x*= (1.0- (initParams.horizonRadius/originSph.x));
+    directionSph.y*= originSph.x*originSph.x;
+    directionSph.z*= originSph.x*sin(originSph.y);
 
-     // Pass direction to result
-     imageStore(posOutput,id,vec4(originSph,0.0));
+
+    imageStore(posOutput,id,vec4(originSph,0.0));
+    //imageStore(dirOutput,id,vec4(direction,0.0));
     imageStore(dirOutput,id,vec4(directionSph,0.0));
-    imageStore(colorOutput,id,vec4(0.0,0.0,0.0,1.0));
+    imageStore(colorOutput,id,vec4(0.0,0.0,0.0,0.0));
     imageStore(isComplete,id,ivec4(0,0,0,0));
 }
