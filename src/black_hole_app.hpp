@@ -49,6 +49,7 @@ namespace narwhal {
 		VkFence fence;
 		BlackHoleComputeData computeData;
 		BlackHoleParameters blackHoleParameters;
+		InitParameters initParameters;
 
 		bool showImgui = true;
 
