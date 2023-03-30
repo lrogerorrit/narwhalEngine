@@ -163,7 +163,7 @@ void CalculateGeodesicDerivative(vec3 x, vec3 u, out vec3 dx, out vec3 du)
     du.y = (u.z * u.z / (r * r * sth * sth * tan(th) * u0));
     du.z = 0.0;
 
-    return;
+    //return;
 }
 
 // Runge-Kutta 4th Order integration
@@ -395,80 +395,67 @@ bool checkWindowBound(ivec2 pos)
 void main()
 {
     ivec2 id= ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
-
     // Check if id is within window bounds
     if (!checkWindowBound(id.xy))
 	{
 		return;
 	}
     
-
-    // Break if already failed bounds check
-    if (imageLoad(isComplete,id).r == 1) { return; }
-
-    vec4 outputColor= imageLoad(colorOutput,id);
+    //We first check if position has been completed
+    if (imageLoad(isComplete,id).r== uint(1)){
+        return;   
+    }
+    //We load the imageColor
     bool colorChanged=false;
-    
-   
+    vec4 color= imageLoad(colorOutput,id);
 
+    //Now we propagate the ray
+    vec4 position= imageLoad(posOutput,id);
+    vec4 direction= imageLoad(dirOutput,id);
 
-    // Propagate ray
-    vec3 x =  imageLoad(posOutput,id).xyz;
-    float t= imageLoad(posOutput,id).w;
-    vec3 u = imageLoad(dirOutput,id).xyz;
-    vec3 xLast = x;
-    float dt = CalculateStepSize(x, u);
-    RK4Step(dt, x, u);
-    
-    // Write back position and direction
-    t += dt;
-    imageStore(posOutput,id,vec4(x.xyz, t));
-    imageStore(dirOutput,id,vec4(u.xyz, 0.0));
+    vec3 x= position.rgb;
+    float t= position.a;
+    vec3 u= direction.xyz;
+    vec3 lastX= x;
+    float dt= CalculateStepSize(x,u);
+    RK4Step(dt,x,u);
 
+    //Write back new position and direction
+    t+= dt;
+    imageStore(posOutput,id,vec4(x.xyz,t));
+    imageStore(dirOutput,id,vec4(u.xyz,0.0));
 
-    // Check for disk crossing
-    if (DiskCheck(x, xLast))
-    {
-        // Save color from accretion disk noise function
-        outputColor = Blend(outputColor, GetDiskColor(x, xLast, t));
+    //We now check for disk cross
+    if (DiskCheck(x,lastX)){
+        color= Blend(color,GetDiskColor(x,lastX,t));
         colorChanged=true;
     }
 
-    // Check for horizon condition
-    if (HorizonCheck(x, u))
-    {
-        // Blend black with previous color
-        outputColor = Blend(outputColor, vec4(0.0, 0.0, 0.0, 1.0));
-
-        // Set complete flag
-        imageStore(isComplete,id,ivec4(1)); //Even though its a vec4, image is only r8 so we only use the first component
+    //We now check for horizon condition
+    if (HorizonCheck(x,u)){
+		color= Blend(color,vec4(0.0,0.0,0.0,1.0));
+        imageStore(isComplete,id,ivec4(1,0,0,0));
         colorChanged=true;
-        
-    }
+	}
 
-    // Check for escape condition
-    if (abs(x.x) > bhParams.params.escapeDistance * bhParams.params.horizonRadius)
-    {
-        // Evaluate skybox texture
-        vec3 outRay = ToCartesianScalar(x.xyz).xyz;
-        outRay.z *= -1.0;
-        vec4 skyboxColor= texture(background,outRay);// = _SkyboxTexture.SampleLevel(sampler_SkyboxTexture, outRay, 0);
-        skyboxColor *= vec4(bhParams.params.starMultiplier.xxx, 1.0);
-
-        // Blend with previous color value
-        outputColor = Blend(outputColor, skyboxColor);
-
-        // Set complete flag
-        imageStore(isComplete,id,ivec4(1)); //Even though its a vec4, image is only r8 so we only use the first component
+    //We check for escape condition
+    if (abs(x.x)> bhParams.params.escapeDistance* bhParams.params.horizonRadius ){
+        vec3 outRay= ToCartesianScalar(x.xyz).xyz;
+        outRay.z*=-1.0;
+        vec4 skyboxColor= texture(background,outRay);
+        skyboxColor*= vec4(bhParams.params.starMultiplier.xxx,1.0);
+        color= Blend(color,skyboxColor);
         colorChanged=true;
+        imageStore(isComplete,id,ivec4(1,0,0,0));
     }
 
-    // Write back color
-    if (colorChanged){
-        imageStore(colorOutput,id,outputColor);
+    if(colorChanged){
+        imageStore(colorOutput,id,color);
     }
-    
-   
 
 
+
+
+
+    //imageStore(colorOutput,id,vec4(dt,0,0,1));
 }

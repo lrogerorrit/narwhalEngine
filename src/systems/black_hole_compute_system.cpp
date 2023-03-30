@@ -62,7 +62,7 @@ namespace narwhal {
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipelineLayout, 0, 1, &frameInfo.computeDescriptorSet, 0, nullptr);
 		int groupsX= (int) ceil( size.width/ COMP_LOCAL_X);
 		int groupsY = (int)ceil(size.height / COMP_LOCAL_Y);
-		vkCmdDispatch(commandBuffer, groupsX,groupsY, 1); //TODO: Calculate dispatch size
+		vkCmdDispatch(commandBuffer, groupsX,groupsY, 2000); //TODO: Calculate dispatch size
 
 		narwhalDevice.endSingleTimeCommands(commandBuffer,frameInfo.computeFence);
 		
