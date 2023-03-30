@@ -49,6 +49,7 @@ class NarwhalDevice {
   VkInstance getInstance() { return instance; }
   VkPhysicalDevice getPhysicalDevice() { return physicalDevice; }
   uint32_t getGraphicsQueueFamily() { return findPhysicalQueueFamilies().graphicsFamily; }
+  VkPhysicalDeviceLimits getLimits() { return properties.limits; }
 
   SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
   uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
