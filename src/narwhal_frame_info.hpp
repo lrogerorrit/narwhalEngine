@@ -77,7 +77,7 @@ namespace narwhal {
 		float beamExponent = 2.f;
 		float rotationSpeed = 1.f;
 		float timeDelayFactor = 0.1f;
-		bool visciousDisk= false; // KERR SPECIFIC
+		bool viscousDisk= false; // KERR SPECIFIC
 		bool relativeTemp= false; // KERR SPECIFIC
 
 		//Noise Params

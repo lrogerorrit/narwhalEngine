@@ -354,7 +354,7 @@ namespace narwhal {
 
 				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,computeDescriptorSets[frameIndex],fence };
 
-				blackHoleComputeSystem.render(frameInfo, blackHoleParameters, newSize);
+				blackHoleComputeSystem.render(frameInfo, computeData.params, newSize);
 
 				//Update Render Descriptor Sets
 				NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
@@ -430,7 +430,7 @@ namespace narwhal {
 			ImGui::SliderFloat("Time Delay Factor", &computeData.params.timeDelayFactor, .01f, 1.f);
 
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::BeginDisabled();
-			ImGui::Checkbox("Viscious Disk", &computeData.params.visciousDisk);
+			ImGui::Checkbox("Viscous Disk", &computeData.params.viscousDisk);
 			ImGui::Checkbox("Relative Temp", &computeData.params.relativeTemp);
 			if (BlackHoleType(blackHoleType) == BlackHoleType::Schwarzchild) ImGui::EndDisabled();
 
