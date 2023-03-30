@@ -254,8 +254,8 @@ namespace narwhal {
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
 				
-				if (shouldInitFrame) {
-					//shouldInitFrame = false;
+				if (shouldInitFrame or glfwGetKey(narwhalWindow.getGLFWwindow(), GLFW_KEY_SPACE) == GLFW_PRESS) {
+					shouldInitFrame = false;
 					/*
 					glm::mat4 camToWorld = glm::mat4(0.06699, 0.25000, -0.96593, -4.00000, 0.25000, 0.93301, 0.25882, 1.00000, -0.96593, 0.25882, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000);
 					glm::mat4 invProj = glm::mat4(2.12548, 0.00000, 0.00000, 0.00000,0.00000, 1.00000, 0.00000, 0.00000,0.00000, 0.00000, 0.00000, -1.00000,0.00000, 0.00000, -1.66617, 1.66717);
@@ -354,12 +354,12 @@ namespace narwhal {
 
 				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,computeDescriptorSets[frameIndex],fence };
 
-				//blackHoleComputeSystem.render(frameInfo, blackHoleParameters, newSize);
+				blackHoleComputeSystem.render(frameInfo, blackHoleParameters, newSize);
 
 				//Update Render Descriptor Sets
 				NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
-					//.writeImage(0, &colorImageInfo)
-					.writeImage(0, &directionImageInfo)
+					.writeImage(0, &colorImageInfo)
+					//.writeImage(0, &positionImageInfo)
 					.overwrite(renderDescriptorSets[frameIndex]);
 
 				QuadFrameInfo quadFrameInfo{ frameIndex,commandBuffer,renderDescriptorSets[frameIndex] };
@@ -390,9 +390,7 @@ namespace narwhal {
 
 		ImGui::Begin("Black Hole Parameters");
 
-		if (NarwhalCameraV2::current) {
-			NarwhalCameraV2::current->renderInMenu();
-		}
+		
 		
 		//Blackhole type selection
 		ImGui::Text("Black Hole Type"); ImGui::SameLine();
@@ -400,6 +398,11 @@ namespace narwhal {
 		ImGui::RadioButton("Kerr", &blackHoleType, 1);
 		
 		computeData.params.blackHoleType = (BlackHoleType) blackHoleType;
+
+		if (NarwhalCameraV2::current) {
+			if (ImGui::CollapsingHeader("Camera"))
+				NarwhalCameraV2::current->renderInMenu();
+		}
 
 		if (ImGui::CollapsingHeader("Step Size Parameters")) {
 			ImGui::SliderFloat("Time Step", &computeData.params.timeStep, 0.0f, 1.0f);
