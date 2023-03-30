@@ -97,11 +97,13 @@ bool checkWindowBound(ivec2 pos)
 {
 	return (pos.x >= 0 && pos.x < initParams.windowSize.x && pos.y >= 0 && pos.y < initParams.windowSize.y);
 }
+
+// linear to srgb
 vec3 gamma(vec3 c)
 {
 	return pow(c,vec3(1.0/2.2));
 }
-
+//SRGB to linear
 vec3 degamma(vec3 c)
 {
 	return pow(c,vec3(2.2));
@@ -152,7 +154,7 @@ void main(){
 
     imageStore(posOutput,id,vec4(originSph,0.0));
     //imageStore(dirOutput,id,vec4(direction,0.0));
-    imageStore(dirOutput,id,vec4(directionSph,0.0));
+    imageStore(dirOutput,id,vec4((directionSph),0.0));
     imageStore(colorOutput,id,vec4(0.0,0.0,0.0,0.0));
     imageStore(isComplete,id,ivec4(0,0,0,0));
 }
