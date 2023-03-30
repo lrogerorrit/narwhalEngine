@@ -1,8 +1,518 @@
 #version 460
-//#extension GL_EXT_debug_printf : enable
 
+// Constants
+
+const float PI = 3.14159265f;
+const float PI2= 1.57079632679489661923f;
+
+const int xSize= 8;
+const int ySize= 8;
+
+
+struct BlackHoleParameters{
+//TODO: Add input textures
+
+	// Black Hole Params
+	float blackHoleType;
+
+	//Step Size Params
+	float timeStep;
+	float poleMargin;
+	float poleStep ;
+	float escapeDistance;
+
+	//Physical Params
+	float horizonRadius;
+	float spinFactor; //KERR SPECIFIC  - RANGE[-1,1]
+	float diskMax;
+	float diskTemp;//RANGE[1E3F,1E4F]
+	float innerFalloffRate; //KERR SPECIFIC
+	float outerFalloffRate; //KERR SPECIFIC
+	float beamExponent;
+	float rotationSpeed;
+	float timeDelayFactor;
+	bool viscousDisk; // KERR SPECIFIC
+	bool relativeTemp; // KERR SPECIFIC
+
+	//Noise Params
+	vec3 noiseOffset;
+	float noiseScale;
+	float noiseCirculation ;
+	float noiseH;
+	int noiseOctaves;
+
+	//Volumetric Noise Params
+	float stepSize;
+	float absorptionFactor;
+	float noiseCutoff;
+	float noiseMultiplier;
+	int maxSteps;
+
+	//Brightness Params
+	float diskMultiplier;
+	float starMultiplier;
+
+};
+
+
+layout(local_size_x = xSize, local_size_y = ySize, local_size_z = 1) in;
+
+layout (binding = 0) uniform parameters{
+	BlackHoleParameters params;
+    float time;
+    bool hardCheck;
+    ivec2 windowSize;
+}bhParams;
+layout(binding=1,rgba8) uniform  image2D colorOutput;
+layout(binding=2, rgba8) uniform image2D posOutput;
+layout(binding=3,rgba8) uniform image2D dirOutput;
+layout(binding=4,rgba8) uniform image2D blackbody;
+layout(binding = 5, r8ui) uniform uimage2D isComplete;
+layout(binding=6) uniform samplerCube background;
+
+
+
+
+
+float falloffRate= bhParams.params.innerFalloffRate;
+
+
+// Pseudorandom 3D function
+float Random(vec3 sampleCoord)
+{
+    return fract(sin(dot(sampleCoord.xyz, vec3(12.9898, 78.233, 49.551))) * 43758.5453123);
+}
+
+// 3D Noise function
+float Noise(vec3 sampleCoord) {
+
+    // Separate integral and fractional components
+    vec3 i = floor(sampleCoord);
+    vec3 fr = fract(sampleCoord);
+
+    // Four corners of adjacent tile
+    float a = Random(i + vec3(0.0, 0.0, 0.0));
+    float b = Random(i + vec3(1.0, 0.0, 0.0));
+    float c = Random(i + vec3(0.0, 1.0, 0.0));
+    float d = Random(i + vec3(1.0, 1.0, 0.0));
+    float e = Random(i + vec3(0.0, 0.0, 1.0));
+    float f = Random(i + vec3(1.0, 0.0, 1.0));
+    float g = Random(i + vec3(0.0, 1.0, 1.0));
+    float h = Random(i + vec3(1.0, 1.0, 1.0));
+
+    // Smooth interpolation
+    vec3 u = fr * fr * (3.0 - 2.0 * fr);
+
+    // Mix and return
+    float z0 = mix(a, b, u.x) +
+        (c - a) * u.y * (1.0 - u.x) +
+        (d - b) * u.x * u.y;
+    float z1 = mix(e, f, u.x) +
+        (g - e) * u.y * (1.0 - u.x) +
+        (h - f) * u.x * u.y;
+    return mix(z0, z1, u.z);
+}
+
+// Fractional Brownian Motion for noise sampling
+float SampleFBM(vec3 x, float H, int numOctaves)
+{
+    // Thank you, as always, to Inigo Quilez for this FBM code snippet
+    float G = exp2(-H);
+    float f = 1.0;
+    float a = 1.0;
+    float t = 0.0;
+    for (int i = 0; i < numOctaves; i++)
+    {
+        t += a * Noise(f * x);
+        f *= 2.0;
+        a *= G;
+    }
+    return t;
+}
+
+// Spherical to Cartesian coordinate conversion
+vec3 ToCartesianScalar(vec3 sph)
+{
+    float x = sph.x * cos(sph.z) * sin(sph.y);
+    float y = sph.x * cos(sph.y);
+    float z = sph.x * sin(sph.z) * sin(sph.y);
+
+    return vec3(x, y, z);
+}
+
+// Calculate change in k along geodesic affine parameter
+void CalculateGeodesicDerivative(vec3 x, vec3 u, out vec3 dx, out vec3 du)
+{
+    // Convert spin factor to Kerr parameter
+    float a = bhParams.params.spinFactor * bhParams.params.horizonRadius / 2.0;
+
+    // Read coordinate values
+    float r = x.x;
+    float rs = bhParams.params.horizonRadius;
+    float th = x.y;
+    float sth = sin(th);
+    float cth = cos(th);
+
+    // Calculate length scales
+    float sig = r * r + a * a * cth * cth;
+    float del = r * r - rs * r + a * a;
+
+    // Calculate metric components
+    float gtt = -(1.0 - (rs * r) / sig);
+    float bph = -rs * r * a * sth * sth / sig;
+    float ypp = (r * r + a * a + rs * r * a * a * sth * sth / sig) * sth * sth;
+
+    // Calculate lapse function and energy
+    float alpha = sqrt((bph * bph / ypp) - gtt);
+    float u0 = sqrt((del * u.x * u.x / sig) + (u.y * u.y / sig) + (u.z * u.z / ypp)) / alpha;
+
+    // Calculate derivatives of metric
+    float dyrdr = (sig * (2.0 * r - rs) - 2.0 * r * del) / (sig * sig);
+    float dyrdt = -2.0 * a * a * cth * sth * del / (sig * sig);
+    float dytdr = -2.0 * r / (sig * sig);
+    float dytdt = 2.0 * a * a * cth * sth / (sig * sig);
+    float dypdr_lower = (2.0 * r + rs * a * a * sth * sth * (sig - (2.0 * r * r)) / (sig * sig)) * sth * sth;
+    float dypdr_upper = -dypdr_lower / (ypp * ypp);
+    float dypdt_lower = (rs * r * a * a / (sig * sig)) * (2.0 * cth * sth * sth * sth) * (2.0 * sig + a * a * sth * sth) + (r * r + a * a) * 2.0 * cth * sth;
+    float dypdt_upper = -dypdt_lower / (ypp * ypp);
+    float dbpdr_lower = -rs * a * sth * sth * (sig - 2.0 * r * r) / (sig * sig);
+    float dbpdr_upper = (ypp * dbpdr_lower - dypdr_lower * bph) / (ypp * ypp);
+    float dbpdt_lower = (-rs * r * a / (sig * sig)) * (2.0 * sth * cth * sig + 2.0 * a * a * cth * sth * sth * sth);
+    float dbpdt_upper = (ypp * dbpdt_lower - dypdt_lower * bph) / (ypp * ypp);
+    float dbpsqdr = (2.0 * bph * dbpdr_lower * ypp - bph * bph * dypdr_lower) / (ypp * ypp);
+    float dbpsqdt = (2.0 * bph * dbpdt_lower * ypp - bph * bph * dypdt_lower) / (ypp * ypp);
+    float dgdr = rs * (sig - 2.0 * r * r) / (sig * sig);
+    float dgdt = 2.0 * rs * r * a * a * cth * sth / (sig * sig);
+
+    // Calculate derivatives of position
+    dx.x = (del / sig) * (u.x / u0);
+    dx.y = (1.0 / sig) * (u.y / u0);
+    dx.z = (1.0 / ypp) * ((u.z / u0) - bph);
+
+    // Calculate derivatives of velocity
+    du.x = (u0 / 2.0) * (dgdr - dbpsqdr);
+    du.x += u.z * (dbpdr_upper);
+    du.x -= (u.x * u.x * 0.5 / u0) * (dyrdr);
+    du.x -= (u.y * u.y * 0.5 / u0) * (dytdr);
+    du.x -= (u.z * u.z * 0.5 / u0) * (dypdr_upper);
+    du.y = (u0 / 2.0) * (dgdt - dbpsqdt);
+    du.y += u.z * (dbpdt_upper);
+    du.y -= (u.x * u.x * 0.5 / u0) * (dyrdt);
+    du.y -= (u.y * u.y * 0.5 / u0) * (dytdt);
+    du.y -= (u.z * u.z * 0.5 / u0) * (dypdt_upper);
+    du.z = 0.0;
+
+    return;
+}
+
+// Runge-Kutta 4th Order integration
+void RK4Step(float tStep, inout vec3 x, inout vec3 u)
+{
+    // Calculate k-factors
+    vec3 dx1, du1, dx2, du2, dx3, du3, dx4, du4;
+    CalculateGeodesicDerivative(x, u, dx1, du1);
+    CalculateGeodesicDerivative(x + dx1 * (tStep / 2.0), u + du1 * (tStep / 2.0), dx2, du2);
+    CalculateGeodesicDerivative(x + dx2 * (tStep / 2.0), u + du2 * (tStep / 2.0), dx3, du3);
+    CalculateGeodesicDerivative(x + dx3 * tStep,         u + du3 * tStep,         dx4, du4);
+
+    // Calculate full update
+    x += (tStep / 6.0) * (dx1 + 2.0 * dx2 + 2.0 * dx3 + dx4);
+    u += (tStep / 6.0) * (du1 + 2.0 * du2 + 2.0 * du3 + du4);
+}
+
+// Generate affine parameter step size
+float CalculateStepSize(vec3 x, vec3 u)
+{
+    float rs = bhParams.params.horizonRadius;
+
+    // Check if near singular points
+    if (x.y < bhParams.params.poleMargin * PI || x.y > (1.0 - bhParams.params.poleMargin) * PI)
+    {
+        return bhParams.params.poleStep;
+    }
+    
+    // Check if near horizon
+    if (abs(x.x) < 2.0 * rs)
+    {
+        // Near horizon regime
+        return bhParams.params.timeStep;
+    }
+
+    // Check if receding
+    if (u.x * x.x > 0.0)
+    {
+        // Far from horizon, receding
+        return max(bhParams.params.timeStep * x.x * x.x, bhParams.params.timeStep);
+    }
+    else
+    {
+        // Far from horizon, approaching
+        return max(bhParams.params.timeStep * (abs(x.x) - (2.0 * rs)), bhParams.params.timeStep);
+        }
+}
+
+// Check if geodesic inevitably crosses horizon
+bool HorizonCheck(vec3 x, vec3 u)
+{
+    // Check if inside of photon sphere
+    if (abs(x.x) < 1.5 * bhParams.params.horizonRadius) {
+        return true;
+    }
+
+    // Break here if not doing thorough checking
+    if (!bhParams.hardCheck) {
+        return false;
+    }
+
+    // Check if stuck near poles
+    if (x.y < bhParams.params.poleMargin * PI || (x.y > (1.0 - bhParams.params.poleMargin) * PI))
+    {
+        return true;
+    }
+
+    // Check if stuck in orbit
+    if (abs(x.x) < 2.0 * bhParams.params.horizonRadius) {
+
+        // Pre-calculate factors
+        float r = x.x;
+        float rs = bhParams.params.horizonRadius;
+        float th = x.y;
+        float sth = sin(th);
+        float A = 1.0 - (rs / r);
+        float a = sqrt(A);
+
+        // Calculate motion constants
+        float E = sqrt((A * u.x * u.x) + (u.y * u.y / (r * r)) + (u.z * u.z / (r * r * sth * sth))) / a;
+        float C = u.z * u.z / (E * E);
+
+        // Check if geodesic originates inside of horizon
+        if (C > (27.0 / 4.0) * rs * rs) {
+            return true;
+        }
+        else {
+            return (x.x * u.x < 0.0);
+        }
+    }
+
+    // Otherwise, keep going
+    return false;
+}
+
+// Check if path will cross accretion disk
+bool DiskCheck(vec3 x, vec3 xLast)
+{
+    // Check for hemisphere change
+    //float newTh = (x.y % PI) - (PI / 2.0);
+    float newTh= (mod(x.y,PI)-PI2);
+    float oldTh= (mod(xLast.y,PI)- PI2);
+    if (newTh * oldTh > 0.0) { return false; }
+
+    // Check if within accretion disk bounds
+    float r_ave = (x.x + xLast.x) / 2.0;
+    if (r_ave < bhParams.params.horizonRadius || r_ave > bhParams.params.diskMax) { return false; }
+
+    // If passed, return true
+    return true;
+}
+
+
+// Volumetric rendering of circumstellar disk
+float VolumetricDiskBrightness(vec3 x, vec3 xLast, float risco, float t)
+{
+    // Calculate position along disk
+    float r = (x.x + xLast.x) / 2.0;
+    float phi = (x.z + xLast.z) / 2.0;
+    float rNorm = (r - risco) / (bhParams.params.diskMax - risco);
+
+    // Calculate starting position
+    vec3 startPos;
+    startPos.x = r * cos(phi + (bhParams.params.noiseCirculation * rNorm) - ((bhParams.time - bhParams.params.timeDelayFactor *t) * bhParams.params.rotationSpeed));
+    startPos.y = r * sin(phi + (bhParams.params.noiseCirculation * rNorm) - ((bhParams.time - bhParams.params.timeDelayFactor *t) * bhParams.params.rotationSpeed));
+    startPos.z = 0.0;
+
+    // Calculate march direction
+    vec3 marchDir = normalize(ToCartesianScalar(x) - ToCartesianScalar(xLast));
+
+    // Calculate number of steps through volume
+    int numSteps = int(ceil(1.0 / (bhParams.params.stepSize * length(marchDir.xz))));
+    numSteps = min(bhParams.params.maxSteps, numSteps);
+
+    // Loop through steps, marching through volume
+    float volumeDepth = 0.0;
+    float volumetricValue = 0.0;
+    float densitySum = 0.0;
+    for (int i = 0; i < numSteps; i++) {
+
+        // Calculate density at next march step
+        volumeDepth += bhParams.params.stepSize;
+        vec3 position = startPos + volumeDepth * marchDir;
+        float density = bhParams.params.noiseMultiplier * (SampleFBM(position * bhParams.params.noiseScale + bhParams.params.noiseOffset,bhParams.params.noiseH, bhParams.params.noiseOctaves) - bhParams.params.noiseCutoff);
+
+        // Calculate brightness/attenuation if in volume
+        bool isInVolume = density > 0.0;
+        if (isInVolume) {
+            densitySum += density;
+            float absorption = exp(-bhParams.params.absorptionFactor * densitySum * bhParams.params.stepSize);
+            volumetricValue += bhParams.params.diskMultiplier * density * bhParams.params.stepSize * absorption;
+        }
+    }
+
+    // Reduce intensity over distance
+    float falloff = rNorm < 0.0 ? exp(bhParams.params.innerFalloffRate * rNorm * bhParams.params.diskMax / risco) : 1.0;
+    volumetricValue *= falloff;
+
+    return volumetricValue;
+}
+
+ivec2 getImagePos(vec2 imageSze,vec2 uv)
+{
+    //First convert uv from -1 to 1 to 0 to 1
+    vec2 uv01 = uv * 0.5 + 0.5;
+
+    return ivec2(uv01 * imageSze);
+}
+
+// Get color of accretion disk
+vec4 GetDiskColor(vec3 x, vec3 xLast, float t)
+{
+    // Calculate innermost stable circular orbit
+    float spp = pow(abs(1.0 + bhParams.params.spinFactor), 1.0 / 3.0);
+    float spm = pow(abs(1.0 - bhParams.params.spinFactor), 1.0 / 3.0);
+    float z1 = 1 + spp * spm * (spp + spm);
+    float z2 = sqrt(3.0 * bhParams.params.spinFactor * bhParams.params.spinFactor + z1 * z1);
+    float risco = 0.5 * bhParams.params.horizonRadius * (3.0 + z2 + sign(bhParams.params.spinFactor) * sqrt((3.0 - z1) * (3.0 + z1 + 2.0 * z2)));
+
+    // Calculate noise texture UV coordinates
+    vec2 uv;
+    float rEval = (x.x + xLast.x) / 2.0;
+    float phEval = (x.z + xLast.z) / 2.0;
+    uv.x = phEval / (2.0 * PI);
+    uv.y = (abs(rEval) - risco) / (bhParams.params.diskMax - risco);
+
+    // Sample noise texture
+    float texColor = VolumetricDiskBrightness(x, xLast, risco, t);
+
+    // Reduce intensity over distance
+    float falloff = uv.y < 0.0 ? exp(bhParams.params.innerFalloffRate * uv.y * bhParams.params.diskMax / risco) : pow(abs(1.0 - uv.y), bhParams.params.outerFalloffRate);
+    texColor *= falloff;
+
+    // Calculate temperature
+    float k = 17.65138460219478737997;
+    float rFactor;
+    if (bhParams.params.viscousDisk) {
+        rFactor = min(1.0, k * pow(abs(risco / rEval), 0.75) * max(0.0, 1 - pow(abs(risco / rEval), 0.125)));
+    }
+    else {
+        if (bhParams.params.relativeTemp) {
+            rFactor = pow(abs(3.0 * bhParams.params.horizonRadius / rEval), 0.75);
+        }
+        else {
+            rFactor = pow(abs(risco / rEval), 0.75);
+        }
+    }
+    float T = bhParams.params.diskTemp * rFactor;
+
+    // Calculate doppler shift
+    float v = sqrt(bhParams.params.horizonRadius / (2.0 * rEval));
+    float gamma = 1.0 / sqrt(1.0 - (v * v));
+    vec3 xDiff = xLast - x;
+    float incidence = xDiff.z * rEval / length(xDiff * vec3(1.0, rEval, rEval));
+    float shift = gamma * (1.0 + v * incidence);
+
+    // Relativistic beaming
+    texColor *= pow(abs(shift),bhParams.params.beamExponent);
+
+    // Calculate gravitational redshift
+    float a = bhParams.params.spinFactor * bhParams.params.horizonRadius / 2.0;
+    shift *= sqrt(1 - (bhParams.params.horizonRadius * rEval / (rEval * rEval + a * a)));
+
+    // Sample blackbody texture
+    uv.x = clamp((shift - 0.25) / (4.0 - 0.25), 0.0, 1.0);
+    uv.y = clamp((T - 1000.0) / (20000.0 - 1000.0), 0.0, 1.0);
+    vec3 bbColor= imageLoad(blackbody, getImagePos(imageSize(blackbody),uv)).rgb;
+
+    // Weight by noise strength and multiplier
+    vec4 outColor = texColor.xxxx * vec4(bbColor.xyz, 1.0);
+
+    // Weight by Stefan-Boltzmann curve
+    outColor *= pow(abs(T / bhParams.params.diskTemp), 4);
+
+    // Return adjusted color
+    return outColor;
+}
+
+// Blend transparency and background colors
+vec4 Blend(vec4 foreColor, vec4 backColor)
+{
+    // Blend using previous color's alpha
+    //vec4 outColor = foreColor + backColor * (1.0 - foreColor.w);
+    vec4 outColor = foreColor + backColor;
+    return outColor;
+}
+bool checkWindowBound(ivec2 pos)
+{
+	return (pos.x >= 0 && pos.x < bhParams.windowSize.x && pos.y >= 0 && pos.y < bhParams.windowSize.y);
+}
 
 void main()
 {
-  
+    ivec2 id= ivec2(gl_GlobalInvocationID.x,gl_GlobalInvocationID.y);
+    // Check if id is within window bounds
+    if (!checkWindowBound(id.xy))
+	{
+		return;
+	}
+    
+    //We first check if position has been completed
+    if (imageLoad(isComplete,id).r== uint(1)){
+        return;   
+    }
+    //We load the imageColor
+    bool colorChanged=false;
+    vec4 color= imageLoad(colorOutput,id);
+
+    //Now we propagate the ray
+    vec4 position= imageLoad(posOutput,id);
+    vec4 direction= imageLoad(dirOutput,id);
+
+    vec3 x= position.rgb;
+    float t= position.a;
+    vec3 u= direction.xyz;
+    vec3 lastX= x;
+    float dt= CalculateStepSize(x,u);
+    RK4Step(dt,x,u);
+
+    //Write back new position and direction
+    t+= dt;
+    imageStore(posOutput,id,vec4(x.xyz,t));
+    imageStore(dirOutput,id,vec4(u.xyz,0.0));
+
+    //We now check for disk cross
+    if (DiskCheck(x,lastX)){
+        color= Blend(color,GetDiskColor(x,lastX,t));
+        colorChanged=true;
+    }
+
+    //We now check for horizon condition
+    /*
+    if (HorizonCheck(x,u)){
+		color= Blend(color,vec4(0.0,0.0,0.0,1.0));
+        imageStore(isComplete,id,ivec4(1,0,0,0));
+        colorChanged=true;
+	}
+    */
+    //We check for escape condition
+    if (abs(x.x)> bhParams.params.escapeDistance* bhParams.params.horizonRadius ){
+        vec3 outRay= ToCartesianScalar(x.xyz).xyz;
+        outRay.z*=-1.0;
+        vec4 skyboxColor= texture(background,outRay);
+        skyboxColor*= vec4(bhParams.params.starMultiplier.xxx,1.0);
+        color= Blend(color,skyboxColor);
+        colorChanged=true;
+        imageStore(isComplete,id,ivec4(1,0,0,0));
+    }
+
+    if(colorChanged){
+        imageStore(colorOutput,id,color);
+  }
 }
