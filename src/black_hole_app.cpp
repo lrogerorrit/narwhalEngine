@@ -258,7 +258,7 @@ namespace narwhal {
 				if (!shouldInitFrame) {
 					framesSincePercentageCheck = 0;
 					int completedPixels = 0;
-					int maxPixels = newSize.width * newSize.height;
+					int maxPixels = newSize.width * newSize.height; //TODO: Fit actual image size
 					memcpy(&completedPixels, completedPixelBuffer->getMappedMemory(), sizeof(int));
 					float percent = (float)completedPixels / (float)maxPixels;
 					float threshold= computeData.params.blackHoleType== BlackHoleType::Schwarzchild ? schwarzchildFrameThreshold : kerrFrameThreshold;
@@ -399,8 +399,8 @@ namespace narwhal {
 				auto prevComputeDataHash = computeDataHasher(computeData.params);
 				auto prevCameraHash = cameraHasher(cameraV2);
 
-				std::cout<< "Prev Camera Hash: " << prevCameraHash << std::endl;
-				std::cout << "Prev Compute Data Hash: " << prevComputeDataHash << std::endl;
+				//std::cout<< "Prev Camera Hash: " << prevCameraHash << std::endl;
+				//std::cout << "Prev Compute Data Hash: " << prevComputeDataHash << std::endl;
 
 
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
@@ -409,8 +409,12 @@ namespace narwhal {
 				narwhalRenderer.endSwapChainRenderPass(commandBuffer);
 				narwhalRenderer.endFrame();
 
-				std::cout<< "Camera Hash: " << cameraHasher(cameraV2) << std::endl;
-				std::cout << "Compute Data Hash: " << computeDataHasher(computeData.params) << std::endl;
+				//std::cout<< "Camera Hash: " << cameraHasher(cameraV2) << std::endl;
+				//std::cout << "Compute Data Hash: " << computeDataHasher(computeData.params) << std::endl;
+
+				if (prevComputeDataHash != computeDataHasher(computeData.params) || prevCameraHash != cameraHasher(cameraV2)) {
+					shouldInitFrame = true;
+				}
 			}
 			
 
