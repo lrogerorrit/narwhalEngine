@@ -38,6 +38,8 @@ namespace narwhal {
 		std::unique_ptr<NarwhalPipeline> schwarzchildPipeline;
 		std::unique_ptr<NarwhalPipeline> kerrPipeline;
 		VkPipelineLayout pipelineLayout;
+
+		int zGroups = 0;
 	};
 }
 
