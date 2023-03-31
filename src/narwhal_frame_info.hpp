@@ -3,10 +3,13 @@
 #include "narwhal_camera.hpp"
 #include "narwhal_game_object.hpp"
 #include "narwhal_matrix_4.hpp"
+#include "utils/utils.hpp"
 
 
 // lib
 #include <vulkan/vulkan.h>
+
+
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -137,5 +140,53 @@ namespace narwhal {
 		alignas(16)glm::vec3 camPosCartesian;
 		alignas(16)glm::vec3 camPosSpherical;
 		float horizonRadius;
+	};
+}
+
+
+//Hash functions
+
+namespace std {
+	template<>
+	struct hash<narwhal::BlackHoleParameters> {
+		size_t operator()(const narwhal::BlackHoleParameters& params) const noexcept {
+			size_t hash = 0;
+
+			// Hash the enum value
+			hash_combine(hash, params.blackHoleType);
+
+			// Hash the float values
+			hash_combine(hash, params.timeStep);
+			hash_combine(hash, params.poleMargin);
+			hash_combine(hash, params.poleStep);
+			hash_combine(hash, params.escapeDistance);
+			hash_combine(hash, params.horizonRadius);
+			hash_combine(hash, params.spinFactor);
+			hash_combine(hash, params.diskMax);
+			hash_combine(hash, params.diskTemp);
+			hash_combine(hash, params.innerFalloffRate);
+			hash_combine(hash, params.outerFalloffRate);
+			hash_combine(hash, params.beamExponent);
+			hash_combine(hash, params.rotationSpeed);
+			hash_combine(hash, params.timeDelayFactor);
+			hash_combine(hash, params.viscousDisk);
+			hash_combine(hash, params.relativeTemp);
+			hash_combine(hash, params.noiseOffset.x);
+			hash_combine(hash, params.noiseOffset.y);
+			hash_combine(hash, params.noiseOffset.z);
+			hash_combine(hash, params.noiseScale);
+			hash_combine(hash, params.noiseCirculation);
+			hash_combine(hash, params.noiseH);
+			hash_combine(hash, params.noiseOctaves);
+			hash_combine(hash, params.stepSize);
+			hash_combine(hash, params.absorptionFactor);
+			hash_combine(hash, params.noiseCutoff);
+			hash_combine(hash, params.noiseMultiplier);
+			hash_combine(hash, params.maxSteps);
+			hash_combine(hash, params.diskMultiplier);
+			hash_combine(hash, params.starMultiplier);
+
+			return hash;
+		}
 	};
 }

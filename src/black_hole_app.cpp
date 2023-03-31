@@ -30,6 +30,7 @@
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <functional>
 
 
 #define MAX_DT 1.f //TODO: Change and tune
@@ -392,12 +393,24 @@ namespace narwhal {
 
 				QuadFrameInfo quadFrameInfo{ frameIndex,commandBuffer,renderDescriptorSets[frameIndex] };
 				
+				
+				std::hash<BlackHoleParameters> computeDataHasher;
+				std::hash<NarwhalCameraV2> cameraHasher;
+				auto prevComputeDataHash = computeDataHasher(computeData.params);
+				auto prevCameraHash = cameraHasher(cameraV2);
+
+				std::cout<< "Prev Camera Hash: " << prevCameraHash << std::endl;
+				std::cout << "Prev Compute Data Hash: " << prevComputeDataHash << std::endl;
+
 
 				narwhalRenderer.beginSwapChainRenderPass(commandBuffer);
 				quadRenderSystem.render(quadFrameInfo);	
 				renderImgui(narwhalImgui, commandBuffer);
 				narwhalRenderer.endSwapChainRenderPass(commandBuffer);
 				narwhalRenderer.endFrame();
+
+				std::cout<< "Camera Hash: " << cameraHasher(cameraV2) << std::endl;
+				std::cout << "Compute Data Hash: " << computeDataHasher(computeData.params) << std::endl;
 			}
 			
 

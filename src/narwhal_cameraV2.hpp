@@ -2,7 +2,9 @@
 #pragma once
 
 #include "narwhal_matrix_4.hpp"
+#include "utils/utils.hpp"
 #include <glm/glm.hpp>
+
 
 
 namespace narwhal{
@@ -75,3 +77,21 @@ namespace narwhal{
 	};
 }
 
+
+namespace std {
+	template<>
+	struct hash<narwhal::NarwhalCameraV2> {
+		size_t operator()(const narwhal::NarwhalCameraV2& params) const noexcept {
+			size_t hash = 0;
+
+			// Hash the enum value
+			hash_combine(hash, params.eye);
+			hash_combine(hash, params.center);
+			hash_combine(hash, params.up);
+			hash_combine(hash, params.fov);
+			hash_combine(hash, params.near_plane);
+			hash_combine(hash, params.far_plane);
+			return hash;
+		}
+	};
+}

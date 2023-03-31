@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <glm/glm.hpp>
 
 
 //VK_CHECK from https://vkguide.dev/docs/chapter-1/vulkan_init_code/
@@ -28,4 +29,24 @@ namespace narwhal {
 		(hashCombine(seed, rest), ...);
 	};
 	
+}
+
+namespace std {
+	template <typename T>
+	void hash_combine(size_t& seed, const T& val) {
+		seed ^= std::hash<T>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	}
+
+	template<>
+	struct hash<glm::vec3> {
+		size_t operator()(const glm::vec3& params) const noexcept {
+			size_t hash = 0;
+
+			// Hash the enum value
+			hash_combine(hash, params.x);
+			hash_combine(hash, params.y);
+			hash_combine(hash, params.z);
+			return hash;
+		}
+	};
 }
