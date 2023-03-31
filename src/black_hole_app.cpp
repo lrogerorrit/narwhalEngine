@@ -45,12 +45,13 @@ namespace narwhal {
 	};
 
 	BlackHoleApp::BlackHoleApp() {
-		const int POOL_SETS_COUNT = 9;
+		const int POOL_SETS_COUNT = 14;
 		globalPool = NarwhalDescriptorPool::Builder(narwhalDevice)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*8)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT*2)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT)
 			.setMaxSets(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT * POOL_SETS_COUNT)
 			.build();
 
@@ -64,12 +65,7 @@ namespace narwhal {
 		vkDestroyFence(narwhalDevice.device(), fence, nullptr);
 	}
 
-	void BlackHoleApp::updateComputeDescriptors(int frameNum, NarwhalDescriptorSetLayout& setLayout) {
 
-	}
-	void BlackHoleApp::updateRenderDescriptors(int frameNum, NarwhalDescriptorSetLayout& setLayout) {
-
-	}
 
 	void BlackHoleApp::run()
 	{
@@ -87,6 +83,10 @@ namespace narwhal {
 		// Make Buffers
 		std::vector<std::unique_ptr<NarwhalBuffer>> parameterBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
 		std::vector<std::unique_ptr<NarwhalBuffer>> uboBuffers(NarwhalSwapChain::MAX_FRAMES_IN_FLIGHT);
+		std::unique_ptr<NarwhalBuffer> completedPixelBuffer=std::make_unique<NarwhalBuffer>(narwhalDevice,sizeof(int),1, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		completedPixelBuffer->map();
+		int zero= 0;
+		completedPixelBuffer.get()->writeToBuffer(&zero, sizeof(int));
 		// Make Storage Images
 		NarwhalStorageImage storageColorImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
 		NarwhalStorageImage storagePositionImage(narwhalDevice, swapChainExtent.width, swapChainExtent.height);
@@ -135,6 +135,7 @@ namespace narwhal {
 			.addBinding(4, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // Temp Image
 			.addBinding(5, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT) // isComplete Image
 			.addBinding(6, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT) // Background Cube map Image
+			.addBinding(7, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_COMPUTE_BIT) // Completed Pixel Buffer
 			.build();
 
 		
@@ -175,6 +176,7 @@ namespace narwhal {
 			auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
 			auto completeImageInfo = storageCompleteImage.getDescriptorImageInfo();
 			auto tempImageInfo = tempImage.getDescriptorImageInfo();
+			auto completedPixelBufferInfo = completedPixelBuffer->descriptorInfo();
 
 
 			NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
@@ -185,6 +187,7 @@ namespace narwhal {
 				.writeImage(4, &tempImageInfo)
 				.writeImage(5,&completeImageInfo)
 				.writeImage(6, &backgroundCubeMapInfo)
+				.writeBuffer(7, &completedPixelBufferInfo)
 				.build(computeDescriptorSets[i]);
 		}
 
@@ -231,6 +234,7 @@ namespace narwhal {
 
 
 		bool shouldInitFrame = true;
+		int framesSincePercentageCheck = 0;
 
 		// Main Loop
 		while (!narwhalWindow.shouldClose()) {
@@ -247,12 +251,29 @@ namespace narwhal {
 				oldSize = newSize;
 				//TODO: Change size of images
 			}
+			framesSincePercentageCheck += 1;
+			// Check if number of completed pixels is over threshold
+			if (framesSincePercentageCheck>=percentageCheckInterval){
+				if (!shouldInitFrame) {
+					framesSincePercentageCheck = 0;
+					int completedPixels = 0;
+					int maxPixels = newSize.width * newSize.height;
+					memcpy(&completedPixels, completedPixelBuffer->getMappedMemory(), sizeof(int));
+					float percent = (float)completedPixels / (float)maxPixels;
+					float threshold= computeData.params.blackHoleType== BlackHoleType::Schwarzchild ? schwarzchildFrameThreshold : kerrFrameThreshold;
+					if (percent > threshold) {
+						shouldInitFrame = true;
+					}
+				}
 
-
+			}
 			
 
 			if (auto commandBuffer = narwhalRenderer.beginFrame()) { //Will return a null ptr if swap chain needs to be recreated
 				int frameIndex = narwhalRenderer.getFrameIndex();
+				
+
+				
 				
 				if (shouldInitFrame or glfwGetKey(narwhalWindow.getGLFWwindow(), GLFW_KEY_SPACE) == GLFW_PRESS) {
 					shouldInitFrame = false;
@@ -302,6 +323,8 @@ namespace narwhal {
 					initParameters.camPosSpherical = glm::vec3(r,theta,phi);
 					initParameters.horizonRadius = computeData.params.horizonRadius;
 					
+					completedPixelBuffer.get()->writeToBuffer(&zero, sizeof(int)); // Reset completed pixel count to zero
+					
 
 
 					frameInitBuffer->writeToBuffer(&initParameters, sizeof(initParameters));
@@ -339,6 +362,7 @@ namespace narwhal {
 				auto backgroundCubeMapInfo = cubemapImage.getDescriptorImageInfo();
 				auto completeImageInfo = storageCompleteImage.getDescriptorImageInfo();
 				auto tempImageInfo = tempImage.getDescriptorImageInfo();
+				auto completedPixelBufferInfo = completedPixelBuffer->descriptorInfo();
 
 
 				NarwhalDescriptorWriter(*computeSetLayout, *globalPool)
@@ -349,12 +373,16 @@ namespace narwhal {
 					.writeImage(4, &tempImageInfo)
 					.writeImage(5, &completeImageInfo)
 					.writeImage(6, &backgroundCubeMapInfo)
+					.writeBuffer(7, &completedPixelBufferInfo)
 					.overwrite(computeDescriptorSets[frameIndex]);
 
 
 				BlackHoleFrameInfo frameInfo{frameIndex,deltaTime,commandBuffer,computeDescriptorSets[frameIndex],fence };
 
 				blackHoleComputeSystem.render(frameInfo, computeData.params, newSize);
+		
+
+				//std::cout << "Completed Pixels: " << computeData.completedPixels << std::endl;
 
 				//Update Render Descriptor Sets
 				NarwhalDescriptorWriter(*renderSetLayout, *globalPool)

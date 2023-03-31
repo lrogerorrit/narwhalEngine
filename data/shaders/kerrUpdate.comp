@@ -51,7 +51,6 @@ struct BlackHoleParameters{
 	//Brightness Params
 	float diskMultiplier;
 	float starMultiplier;
-
 };
 
 
@@ -69,7 +68,9 @@ layout(binding=3,rgba8) uniform image2D dirOutput;
 layout(binding=4,rgba8) uniform image2D blackbody;
 layout(binding = 5, r8ui) uniform uimage2D isComplete;
 layout(binding=6) uniform samplerCube background;
-
+layout(binding=7) buffer CompletePixelCounter {
+	int count;
+}completePixelCounter;
 
 
 
@@ -499,6 +500,7 @@ void main()
 		color= Blend(color,vec4(0.0,0.0,0.0,1.0));
         imageStore(isComplete,id,ivec4(1,0,0,0));
         colorChanged=true;
+        atomicAdd(completePixelCounter.count,1);
 	}
     */
     //We check for escape condition
@@ -510,6 +512,7 @@ void main()
         color= Blend(color,skyboxColor);
         colorChanged=true;
         imageStore(isComplete,id,ivec4(1,0,0,0));
+        atomicAdd(completePixelCounter.count,1);
     }
 
     if(colorChanged){

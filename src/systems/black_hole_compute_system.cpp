@@ -16,7 +16,8 @@ namespace narwhal {
 	{
 		createPipelineLayout(setLayout);
 		createPipelines(renderPass);
-		int maxZGroups = narwhalDevice.getLimits().maxComputeWorkGroupCount[3];
+		VkPhysicalDeviceLimits limits = narwhalDevice.getLimits();
+		int maxZGroups = limits.maxComputeWorkGroupCount[2];
 		zGroups = std::min(2000,maxZGroups);
 	}
 	BlackHoleComputeSystem::~BlackHoleComputeSystem()

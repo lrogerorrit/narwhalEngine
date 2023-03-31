@@ -97,7 +97,6 @@ namespace narwhal {
 		//Brightness Params
 		float diskMultiplier = 1.f;
 		float starMultiplier = 1.f;
-
 	};
 
 	struct BlackHoleComputeData
@@ -105,9 +104,7 @@ namespace narwhal {
 		BlackHoleParameters params;
 		float time = 0;
 		bool hardCheck = false;
-		glm::ivec2 windowSize{0};
-		
-
+		glm::ivec2 windowSize{ 0 };
 	};
 
 	struct BlackHoleFrameInfo {
