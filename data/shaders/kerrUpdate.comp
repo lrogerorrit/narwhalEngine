@@ -62,10 +62,10 @@ layout (binding = 0) uniform parameters{
     bool hardCheck;
     ivec2 windowSize;
 }bhParams;
-layout(binding=1,rgba8) uniform  image2D colorOutput;
-layout(binding=2, rgba8) uniform image2D posOutput;
-layout(binding=3,rgba8) uniform image2D dirOutput;
-layout(binding=4,rgba8) uniform image2D blackbody;
+layout(binding=1,rgba32f) uniform  image2D colorOutput;
+layout(binding=2, rgba32f) uniform image2D posOutput;
+layout(binding=3,rgba32f) uniform image2D dirOutput;
+layout(binding=4) uniform sampler2D blackbody;
 layout(binding = 5, r8ui) uniform uimage2D isComplete;
 layout(binding=6) uniform samplerCube background;
 layout(binding=7) buffer CompletePixelCounter {
@@ -430,7 +430,7 @@ vec4 GetDiskColor(vec3 x, vec3 xLast, float t)
     // Sample blackbody texture
     uv.x = clamp((shift - 0.25) / (4.0 - 0.25), 0.0, 1.0);
     uv.y = clamp((T - 1000.0) / (20000.0 - 1000.0), 0.0, 1.0);
-    vec3 bbColor= imageLoad(blackbody, getImagePos(imageSize(blackbody),uv)).rgb;
+     vec3 bbColor= textureLod(blackbody,uv,0).rgb;
 
     // Weight by noise strength and multiplier
     vec4 outColor = texColor.xxxx * vec4(bbColor.xyz, 1.0);
