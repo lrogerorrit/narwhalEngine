@@ -2,6 +2,7 @@
 
 #include "narwhal_game_object.hpp"
 #include "narwhal_window.hpp"
+#include "narwhal_cameraV2.hpp"
 
 
 namespace narwhal {

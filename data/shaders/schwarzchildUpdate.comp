@@ -454,7 +454,7 @@ void main()
     if (abs(x.x)> bhParams.params.escapeDistance* bhParams.params.horizonRadius ){
         vec3 outRay= ToCartesianScalar(x.xyz).xyz;
         outRay.z*=-1.0;
-        vec4 skyboxColor= texture(background,outRay);
+        vec4 skyboxColor= textureLod(background,outRay,0);
         skyboxColor*= vec4(bhParams.params.starMultiplier.xxx,1.0);
         color= Blend(color,skyboxColor);
         colorChanged=true;

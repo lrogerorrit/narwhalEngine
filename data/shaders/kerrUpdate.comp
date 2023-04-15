@@ -2,6 +2,8 @@
 
 // Constants
 
+
+
 const float PI = 3.14159265f;
 const float PI2= 1.57079632679489661923f;
 
@@ -429,7 +431,7 @@ vec4 GetDiskColor(vec3 x, vec3 xLast, float t)
 
     // Sample blackbody texture
     uv.x = clamp((shift - 0.25) / (4.0 - 0.25), 0.0, 1.0);
-    uv.y = clamp((T - 1000.0) / (20000.0 - 1000.0), 0.0, 1.0);
+    uv.y = clamp((T - 1000.0) / (10000.0 - 1000.0), 0.0, 1.0);
      vec3 bbColor= textureLod(blackbody,uv,0).rgb;
 
     // Weight by noise strength and multiplier
