@@ -50,7 +50,7 @@ namespace narwhal {
 
 		bool showImgui = true;
 		float schwarzchildFrameThreshold = .99f;
-		float kerrFrameThreshold = .8f;
+		float kerrFrameThreshold = .80f;
 		int percentageCheckInterval = 0;
 
 	};

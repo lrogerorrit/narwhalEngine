@@ -432,8 +432,11 @@ namespace narwhal {
 		// Start the Dear ImGui frame
 		
 		static int blackHoleType = 0;
-
+		float delta = ImGui::GetIO().DeltaTime;
+		float fps = 1.0 / delta;
 		ImGui::Begin("Black Hole Parameters");
+		ImGui::Text("FPS: %.1f", fps);
+		ImGui::Text("Average FPS: %.1f", ImGui::GetIO().Framerate);
 
 		
 		
@@ -498,8 +501,8 @@ namespace narwhal {
 		}
 
 		if (ImGui::CollapsingHeader("Brightness Parameters")) {
-			ImGui::SliderFloat("Disk Multiplier", &computeData.params.diskMultiplier, 0.f, 3.f);
-			ImGui::SliderFloat("Stars Multiplier", &computeData.params.starMultiplier, 0.f, 3.f);
+			ImGui::SliderFloat("Disk Multiplier", &computeData.params.diskMultiplier, 0.f, 5.f);
+			ImGui::SliderFloat("Stars Multiplier", &computeData.params.starMultiplier, 0.f, 5.f);
 		}
 		
 
