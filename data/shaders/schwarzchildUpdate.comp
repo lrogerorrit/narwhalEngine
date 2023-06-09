@@ -194,7 +194,7 @@ float CalculateStepSize(vec3 x, vec3 u)
     // Check if near singular points
     if (x.y < poleMargin * PI || x.y > (1.0 - poleMargin) * PI)
     {
-        return bhParams.params.poleStep;;
+        return bhParams.params.poleStep;
     }
     
     // Check if near horizon
