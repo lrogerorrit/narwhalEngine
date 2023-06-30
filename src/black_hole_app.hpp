@@ -15,6 +15,8 @@
 
 namespace narwhal {
 
+
+
 	class NarwhalImgui;
 	class BlackHoleApp
 	{
@@ -49,9 +51,18 @@ namespace narwhal {
 		InitParameters initParameters;
 
 		bool showImgui = true;
+		bool orbitCamera = true;
+		int orbitAxis = 0; //0: x, 1: y, 2: z
+		glm::vec3 orbitOffset= glm::vec3(0,0,0);
+		float orbitSpeed = 0.1f;
+		float orbitAngle= 0.0f;
+		float orbitRadius = 10;
 		float schwarzchildFrameThreshold = .99f;
 		float kerrFrameThreshold = .80f;
 		int percentageCheckInterval = 0;
+
+		const char* renderTextures[4] = { "Color","Position","Direction","IsComplete"};
+		int renderTextureIndex = 0;
 
 	};
 }

@@ -225,7 +225,10 @@ namespace narwhal {
 		const glm::vec3 cameraPos = glm::vec3(-4,1,0);
 		const glm::vec3 cameraTarget = glm::vec3(0,0,0);
 		NarwhalCameraV2 cameraV2;
+		NarwhalCameraV2 orbitCam;
 		cameraV2.setPerspective( 90, newSize.width / (float)newSize.height, 0.3f, 1000.0f);
+		orbitCam.setPerspective(90, newSize.width / (float)newSize.height, 0.3f, 1000.0f);
+
 		cameraV2.lookAt( cameraPos, cameraTarget);
 		cameraV2.enable();
 		auto startTime = std::chrono::high_resolution_clock::now();
@@ -304,13 +307,41 @@ namespace narwhal {
 					initParameters.horizonRadius = computeData.params.horizonRadius;
 					*/
 
-					float r = glm::length(cameraV2.eye);
-					float theta = atan2(glm::length(glm::vec2(cameraV2.eye.x, cameraV2.eye.z)), cameraV2.eye.y);
-					float phi = atan2(cameraV2.eye.z, cameraV2.eye.x);
+					//Orbit cam
+					if (this->orbitCamera) {
+						this->orbitAngle += orbitSpeed * deltaTime;
+						if (this->orbitAngle > M_PI) {
+							this->orbitAngle = -M_PI;
+						}
+						if (this->orbitAxis == 0) { //X
+							glm::vec3 pos= glm::vec3(glm::cos(orbitAngle) * orbitRadius, 0, glm::sin(orbitAngle) * orbitRadius);
+							orbitCam.lookAt(glm::vec3(pos), glm::vec3(0,0,0));
+							orbitCam.move(this->orbitOffset);
+							
+							
+
+						}
+						else if (this->orbitAxis == 1) { //Y
+							orbitCam.lookAt(glm::vec3(0, orbitRadius+5, 0), glm::vec3(0, 0, 0));
+							orbitCam.rotate(orbitAngle, glm::vec3(0, 1, 0));
+
+						}
+						else if (this->orbitAxis == 2) { //Z
+							orbitCam.lookAt(glm::vec3(0, 5, orbitRadius), glm::vec3(0, 0, 0));
+							orbitCam.rotate(orbitAngle, glm::vec3(0, 0, 1));
+
+						}
+					}
+
+					NarwhalCameraV2& cam= this->orbitCamera ? orbitCam : cameraV2;
+
+					float r = glm::length(cam.eye);
+					float theta =  atan2(glm::length(glm::vec2(cam.eye.x, cam.eye.z)), cam.eye.y);
+					float phi = atan2(cam.eye.z, cam.eye.x);
 					
-					Matrix44 invView = cameraV2.view_matrix;
-					Matrix44 invProj = cameraV2.projection_matrix;
-					Matrix44 invViewProj = cameraV2.viewprojection_matrix;
+					Matrix44 invView = cam.view_matrix;
+					Matrix44 invProj = cam.projection_matrix;
+					Matrix44 invViewProj = cam.viewprojection_matrix;
 					invView.inverse();
 					invProj.inverse();
 					invViewProj.inverse();
@@ -318,9 +349,9 @@ namespace narwhal {
 					Matrix44 camToWorld = invView * invProj;
 
 					initParameters.windowSize= glm::ivec2(newSize.width, newSize.height);
-					initParameters.camToWorld = cameraV2.view_matrix;
+					initParameters.camToWorld = cam.view_matrix;
 					initParameters.camInverseProj = invProj;
-					initParameters.camPosCartesian = cameraV2.eye;
+					initParameters.camPosCartesian = cam.eye;
 					initParameters.camPosSpherical = glm::vec3(r,theta,phi);
 					initParameters.horizonRadius = computeData.params.horizonRadius;
 					
@@ -386,8 +417,24 @@ namespace narwhal {
 				//std::cout << "Completed Pixels: " << computeData.completedPixels << std::endl;
 
 				//Update Render Descriptor Sets
+				VkDescriptorImageInfo& renderInfo= colorImageInfo;
+				if (renderTextureIndex == 1) {//Position
+					renderInfo = positionImageInfo;
+				}
+				else if (renderTextureIndex==2) //Direction
+				{
+					renderInfo = directionImageInfo;
+
+				}
+				else if (renderTextureIndex == 3) { // IsComplete
+					renderInfo = completeImageInfo;
+				}
+					
+
+				
+
 				NarwhalDescriptorWriter(*renderSetLayout, *globalPool)
-					.writeImage(0, &colorImageInfo)
+					.writeImage(0, &renderInfo)
 					//.writeImage(0, &positionImageInfo)
 					.overwrite(renderDescriptorSets[frameIndex]);
 
@@ -448,8 +495,15 @@ namespace narwhal {
 		computeData.params.blackHoleType = (BlackHoleType) blackHoleType;
 
 		if (NarwhalCameraV2::current) {
-			if (ImGui::CollapsingHeader("Camera"))
+			if (ImGui::CollapsingHeader("Camera")) {
 				NarwhalCameraV2::current->renderInMenu();
+				ImGui::Checkbox("Orbit Camera", &this->orbitCamera);
+				if (this->orbitCamera) {
+					ImGui::SliderFloat("R", &this->orbitRadius, -10, 10);
+					ImGui::SliderFloat("Speed", &this->orbitSpeed, 0, 1);
+					ImGui::SliderFloat3("Offset", &this->orbitOffset.x, -5, 5);
+				}
+			}
 		}
 
 		if (ImGui::CollapsingHeader("Step Size Parameters")) {
@@ -503,6 +557,11 @@ namespace narwhal {
 		if (ImGui::CollapsingHeader("Brightness Parameters")) {
 			ImGui::SliderFloat("Disk Multiplier", &computeData.params.diskMultiplier, 0.f, 5.f);
 			ImGui::SliderFloat("Stars Multiplier", &computeData.params.starMultiplier, 0.f, 5.f);
+		}
+
+		if (ImGui::CollapsingHeader("Render Parameters")) {
+	
+			ImGui::ListBox("Render Texture", &renderTextureIndex, renderTextures, 4, 4);
 		}
 		
 

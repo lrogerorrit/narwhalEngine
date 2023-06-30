@@ -26,7 +26,7 @@ void main(){
 	vec4 color = imageLoad(text,toTexturePos(f_uv,imgSize));
 	//color.rgb= degamma(color.rgb);
 	//color.rgb=gamma(color.rgb);
-	outColor= vec4(color.rgb,1);
+	outColor= normalize(vec4(color.rgb,1));
 	//outColor=vec4(f_uv.x,f_uv.y,0,1);
 
 }
