@@ -322,13 +322,15 @@ namespace narwhal {
 
 						}
 						else if (this->orbitAxis == 1) { //Y
-							orbitCam.lookAt(glm::vec3(0, orbitRadius+5, 0), glm::vec3(0, 0, 0));
-							orbitCam.rotate(orbitAngle, glm::vec3(0, 1, 0));
-
+							glm::vec3 pos= glm::vec3(0, glm::cos(orbitAngle) * orbitRadius, glm::sin(orbitAngle) * orbitRadius);
+							orbitCam.lookAt(glm::vec3(pos), glm::vec3(0,0,0));
+							orbitCam.move(this->orbitOffset);
 						}
 						else if (this->orbitAxis == 2) { //Z
-							orbitCam.lookAt(glm::vec3(0, 5, orbitRadius), glm::vec3(0, 0, 0));
-							orbitCam.rotate(orbitAngle, glm::vec3(0, 0, 1));
+							glm::vec3 pos= glm::vec3( glm::cos(orbitAngle) * orbitRadius, glm::sin(orbitAngle) * orbitRadius, 0);
+							orbitCam.lookAt(glm::vec3(pos), glm::vec3(0,0,0));
+							orbitCam.move(this->orbitOffset);
+							
 
 						}
 					}
@@ -499,9 +501,15 @@ namespace narwhal {
 				NarwhalCameraV2::current->renderInMenu();
 				ImGui::Checkbox("Orbit Camera", &this->orbitCamera);
 				if (this->orbitCamera) {
+					ImGui::Text("Orbit Direction"); ImGui::SameLine();
+					ImGui::RadioButton("X", &orbitAxis, 0); ImGui::SameLine();
+					ImGui::RadioButton("Y", &orbitAxis, 1); ImGui::SameLine();
+					ImGui::RadioButton("Z", &orbitAxis, 2);
+
 					ImGui::SliderFloat("R", &this->orbitRadius, -10, 10);
 					ImGui::SliderFloat("Speed", &this->orbitSpeed, 0, 1);
 					ImGui::SliderFloat3("Offset", &this->orbitOffset.x, -5, 5);
+
 				}
 			}
 		}

@@ -51,7 +51,7 @@ namespace narwhal {
 		InitParameters initParameters;
 
 		bool showImgui = true;
-		bool orbitCamera = true;
+		bool orbitCamera = false;
 		int orbitAxis = 0; //0: x, 1: y, 2: z
 		glm::vec3 orbitOffset= glm::vec3(0,0,0);
 		float orbitSpeed = 0.1f;
